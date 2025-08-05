@@ -6,7 +6,7 @@ import FilterBar from "./FilterBar"
 import Pagination from "./Pagination"
 import { useProducts } from "@/hooks/use-products"
 
-const PRODUCTS_PER_PAGE = 6
+const PRODUCTS_PER_PAGE = 3
 
 export default function ProductsSection() {
   const [isVisible, setIsVisible] = useState(false)

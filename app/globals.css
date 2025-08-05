@@ -3,6 +3,55 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Fuentes personalizadas */
+@font-face {
+  font-family: 'Palm Royale';
+  src: url('/fonts/palm-royale/Palm Royale.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Palm Royale';
+  src: url('/fonts/palm-royale/Palm Royale.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LT Afficher Neue';
+  src: url('/fonts/lt-afficher-neue/LTAfficherNeue-Display.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LT Afficher Neue';
+  src: url('/fonts/lt-afficher-neue/LTAfficherNeue-BoldDisplay.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LT Afficher Neue';
+  src: url('/fonts/lt-afficher-neue/LTAfficherNeue-MediumDisplay.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LT Afficher Neue';
+  src: url('/fonts/lt-afficher-neue/LTAfficherNeue-SemBdDisplay.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

@@ -4,10 +4,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { Star, ChevronLeft, ChevronRight, ArrowLeft, CheckCircle, Truck, Shield, CreditCard } from "lucide-react"
 import { useEffect, useState, use } from "react"
-import { getProductById, getPlanesProducto, calcularCuota } from "@/lib/supabase-products"
+import { getProductById, getPlanesProducto, calcularCuota, formatearPrecio, getProductsByCategory } from "@/lib/supabase-products"
 import { Product, PlanFinanciacion } from "@/lib/products"
 import WhatsAppButton from "@/components/WhatsAppButton"
 import GlobalAppBar from "@/components/GlobalAppBar"
+import Footer from "@/components/Footer"
+import ProductCard from "@/components/ProductCard"
 
 interface ProductPageProps {
   params: Promise<{
@@ -19,6 +21,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [product, setProduct] = useState<Product | null>(null)
   const [planes, setPlanes] = useState<PlanFinanciacion[]>([])
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,10 +40,20 @@ export default function ProductPage({ params }: ProductPageProps) {
       const productData = await getProductById(id)
       setProduct(productData)
       
-      // Cargar planes de financiación
+      // Cargar planes de financiación y productos relacionados
       if (productData) {
-        const planesData = await getPlanesProducto(id)
+        const [planesData, relatedData] = await Promise.all([
+          getPlanesProducto(id),
+          getProductsByCategory(productData.fk_id_categoria || 1)
+        ])
+        
         setPlanes(planesData)
+        
+        // Filtrar productos relacionados (excluir el producto actual y limitar a 3)
+        const filteredRelated = relatedData
+          .filter(p => p.id !== productData.id)
+          .slice(0, 3)
+        setRelatedProducts(filteredRelated)
       }
     } catch (err) {
       setError('Error al cargar el producto')
@@ -169,7 +182,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <div className="flex items-baseline gap-4">
                   <span className="text-5xl font-bold text-violet-600">
-                    ${productPrice.toLocaleString()}
+                    ${formatearPrecio(productPrice)}
                   </span>
                   <span className="text-lg text-gray-500">ARS</span>
                 </div>
@@ -198,7 +211,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                             colores[index % colores.length]
                           }`}
                         >
-                          {plan.cuotas} CUOTAS MENSUALES x ${calculo.cuota_mensual.toLocaleString()}
+                          {plan.cuotas} CUOTAS MENSUALES x ${formatearPrecio(calculo.cuota_mensual)}
                         </div>
                       )
                     })}
@@ -258,6 +271,53 @@ export default function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Sección de Productos Relacionados */}
+      {relatedProducts.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Productos que te pueden interesar
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Descubre más productos de la misma categoría que podrían ser perfectos para ti
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-blue-500 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {relatedProducts.map((relatedProduct, index) => (
+                <div
+                  key={relatedProduct.id}
+                  className={`transition-all duration-700 ${
+                    index === 0
+                      ? "delay-100 animate-fade-in-up"
+                      : index === 1
+                        ? "delay-200 animate-fade-in-up"
+                        : "delay-300 animate-fade-in-up"
+                  }`}
+                >
+                  <ProductCard product={relatedProduct} />
+                </div>
+              ))}
+            </div>
+
+            {/* Botón para ver más productos de la categoría */}
+            <div className="text-center mt-12">
+              <Link
+                href="/"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-violet-600 to-blue-600 text-white font-bold rounded-xl hover:from-violet-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                Ver más productos
+                <ChevronRight className="ml-2" size={20} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      <Footer />
     </div>
   )
 }

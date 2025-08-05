@@ -1,6 +1,14 @@
 import { supabase } from './supabase'
 import { Product, Categoria, Marca, PlanFinanciacion, ProductoPlan } from './products'
 
+// Función para formatear números con 2 decimales
+export function formatearPrecio(precio: number): string {
+  return precio.toLocaleString('es-AR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
 // Función para calcular cuotas
 export function calcularCuota(precio: number, plan: PlanFinanciacion) {
   // Verificar si el producto aplica para este plan
@@ -18,7 +26,7 @@ export function calcularCuota(precio: number, plan: PlanFinanciacion) {
     precio_original: precio,
     recargo_total: recargo,
     precio_final: precio_final,
-    cuota_mensual: cuota_mensual,
+    cuota_mensual: Math.round(cuota_mensual * 100) / 100, // Redondear a 2 decimales
     cuotas: plan.cuotas,
     recargo_porcentual: plan.recargo_porcentual
   }

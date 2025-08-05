@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { PlanFinanciacion } from '@/lib/products'
-import { getPlanesProducto, calcularCuota } from '@/lib/supabase-products'
+import { getPlanesProducto, calcularCuota, formatearPrecio } from '@/lib/supabase-products'
 
 interface FinancingPlansProps {
   productoId: string
@@ -58,7 +58,7 @@ export default function FinancingPlans({ productoId, precio }: FinancingPlansPro
               colores[index % colores.length]
             }`}
           >
-            {plan.cuotas} CUOTAS MENSUALES x ${calculo.cuota_mensual.toLocaleString()}
+            {plan.cuotas} CUOTAS MENSUALES x ${formatearPrecio(calculo.cuota_mensual)}
           </div>
         )
       })}

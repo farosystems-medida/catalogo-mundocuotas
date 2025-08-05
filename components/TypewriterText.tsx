@@ -2,9 +2,27 @@
 
 import { useState, useEffect } from "react"
 
-const fonts = ["font-serif", "font-mono", "font-sans", "font-bold", "font-extrabold"]
+const fonts = [
+  "font-['Palm_Royale'] italic", 
+  "font-['LT_Afficher_Neue'] font-bold", 
+  "font-['Palm_Royale'] font-bold", 
+  "font-['LT_Afficher_Neue'] font-medium", 
+  "font-['Palm_Royale'] italic",
+  "font-['LT_Afficher_Neue'] font-semibold",
+  "font-['Palm_Royale'] font-bold italic",
+  "font-['LT_Afficher_Neue'] font-bold"
+]
 
-const colors = ["text-yellow-400", "text-blue-300", "text-green-400", "text-purple-400", "text-pink-400"]
+const colors = [
+  "text-yellow-400", 
+  "text-yellow-500", 
+  "text-orange-400", 
+  "text-orange-500", 
+  "text-violet-700",
+  "text-violet-800",
+  "text-amber-500",
+  "text-amber-600"
+]
 
 export default function TypewriterText() {
   const [displayText, setDisplayText] = useState("")
@@ -51,7 +69,7 @@ export default function TypewriterText() {
   }, [])
 
   return (
-    <span className={`${fonts[currentFontIndex]} ${colors[currentColorIndex]} text-glow transition-all duration-500`}>
+    <span className={`${fonts[currentFontIndex]} ${colors[currentColorIndex]} text-glow transition-all duration-700 ease-in-out inline-block`}>
       {displayText}
       <span className={`${showCursor ? "opacity-100" : "opacity-0"} transition-opacity duration-100`}>|</span>
     </span>

@@ -2,6 +2,7 @@ import HeroSection from "@/components/HeroSection"
 import FeaturedSection from "@/components/FeaturedSection"
 import ProductsSection from "@/components/ProductsSection"
 import GlobalAppBar from "@/components/GlobalAppBar"
+import Footer from "@/components/Footer"
 
 export default function Home() {
   return (
@@ -15,6 +16,8 @@ export default function Home() {
           <ProductsSection />
         </div>
       </main>
+      
+      <Footer />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { Home, Package, Zap, User, Phone, Lightbulb } from "lucide-react"
+import { Home, Package, Zap, Sparkles } from "lucide-react"
 
 export default function GlobalAppBar() {
   const scrollToProducts = () => {
@@ -12,61 +12,70 @@ export default function GlobalAppBar() {
   }
 
   return (
-    <div className="sticky top-0 z-50 bg-violet-600 border-b border-violet-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Teléfonos */}
-        <div className="flex items-center justify-center py-2">
-          <div className="flex items-center space-x-6 text-white text-sm">
-            <div className="flex items-center gap-2">
-              <Phone size={14} />
-              <span>0810-333-9435</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone size={14} />
-              <span>011-6811-6000</span>
-            </div>
-          </div>
-        </div>
-
+    <div className="sticky top-0 z-50 bg-gradient-to-r from-violet-700 via-violet-600 to-violet-700 shadow-lg border-b border-violet-800">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Header principal */}
-        <div className="flex items-center py-4">
-          {/* Logo - Más a la izquierda */}
-          <div className="w-1/4">
-            <Link href="/" className="flex items-center gap-3">
-              <Lightbulb size={32} className="text-yellow-300" />
-              <span className="text-white font-bold text-3xl">
-                MUNDOCUOTAS
-              </span>
+        <div className="flex items-center justify-between py-4">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center group">
+              <div className="relative">
+                <img 
+                  src="/logo.svg" 
+                  alt="MUNDO CUOTAS" 
+                  className="h-28 w-auto transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-violet-400 opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
+              </div>
+              <div className="ml-4">
+                <h1 className="text-2xl font-bold text-white tracking-wide group-hover:text-violet-200 transition-colors duration-300">
+                  MUNDOCUOTAS
+                </h1>
+                <p className="text-xs text-violet-200 font-medium">Tu tienda de confianza</p>
+              </div>
             </Link>
           </div>
 
-          {/* Navegación - Centrada en el espacio restante */}
-          <div className="w-2/4 flex justify-center">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="flex items-center text-white hover:text-violet-200 transition-colors duration-300">
-                <Home className="mr-2" size={16} />
-                <span className="font-medium">Inicio</span>
+          {/* Navegación central */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <div className="flex items-center bg-violet-800/30 rounded-full p-1 backdrop-blur-sm">
+              <Link 
+                href="/" 
+                className="flex items-center px-4 py-2 text-white hover:text-violet-200 rounded-full transition-all duration-300 hover:bg-violet-800/50 group"
+              >
+                <Home className="mr-2 size-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="font-semibold text-sm">Inicio</span>
               </Link>
+              
               <button 
                 onClick={scrollToProducts}
-                className="flex items-center text-white hover:text-violet-200 transition-colors duration-300"
+                className="flex items-center px-4 py-2 text-white hover:text-violet-200 rounded-full transition-all duration-300 hover:bg-violet-800/50 group"
               >
-                <Package className="mr-2" size={16} />
-                <span className="font-medium">Productos</span>
+                <Package className="mr-2 size-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="font-semibold text-sm">Productos</span>
               </button>
-              <Link href="/#destacados" className="flex items-center text-white hover:text-violet-200 transition-colors duration-300">
-                <Zap className="mr-2" size={16} />
-                <span className="font-medium">Destacados</span>
+              
+              <Link 
+                href="/#destacados" 
+                className="flex items-center px-4 py-2 text-white hover:text-violet-200 rounded-full transition-all duration-300 hover:bg-violet-800/50 group"
+              >
+                <Zap className="mr-2 size-5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="font-semibold text-sm">Destacados</span>
               </Link>
-              <span className="text-white font-medium border-b-2 border-white">CATÁLOGO</span>
+              
+              <div className="flex items-center px-4 py-2 bg-violet-500/50 text-white rounded-full border border-violet-400/30">
+                <Sparkles className="mr-2 size-5" />
+                <span className="font-bold text-sm">CATÁLOGO</span>
+              </div>
             </div>
-          </div>
+          </nav>
 
-          {/* Icono de usuario - Alineado a la derecha */}
-          <div className="w-1/4 flex justify-end">
-            <button className="p-2 text-white hover:text-violet-200 transition-colors duration-300">
-              <User size={20} />
-            </button>
+          {/* Indicador de estado */}
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 bg-violet-800/30 rounded-full px-3 py-1 backdrop-blur-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-violet-200 text-xs font-medium">En línea</span>
+            </div>
           </div>
         </div>
       </div>

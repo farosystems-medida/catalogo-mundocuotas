@@ -2,13 +2,17 @@
 
 import { useEffect, useState } from "react"
 import ProductCard from "./ProductCard"
+import Pagination from "./Pagination"
 import { getFeaturedProducts } from "@/lib/supabase-products"
 import { Product } from "@/lib/products"
+
+const FEATURED_PRODUCTS_PER_PAGE = 3
 
 export default function FeaturedSection() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Cargar productos destacados
   useEffect(() => {
@@ -59,7 +63,16 @@ export default function FeaturedSection() {
     )
   }
 
-  const displayProducts = featuredProducts.slice(0, 6) // Limitar a 6 productos destacados
+  // Calcular paginación para productos destacados
+  const totalPages = Math.ceil(featuredProducts.length / FEATURED_PRODUCTS_PER_PAGE)
+  const startIndex = (currentPage - 1) * FEATURED_PRODUCTS_PER_PAGE
+  const displayProducts = featuredProducts.slice(startIndex, startIndex + FEATURED_PRODUCTS_PER_PAGE)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    // Scroll suave a la sección de destacados
+    document.getElementById("destacados")?.scrollIntoView({ behavior: "smooth" })
+  }
 
   return (
     <section
@@ -83,21 +96,48 @@ export default function FeaturedSection() {
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full animate-pulse-glow"></div>
         </div>
 
+        {/* Contador de productos destacados */}
+        <div className="mb-8 text-center">
+          <p className="text-blue-100">
+            Mostrando <span className="font-semibold text-yellow-300">{displayProducts.length}</span> de{" "}
+            <span className="font-semibold text-yellow-300">{featuredProducts.length}</span> productos destacados
+          </p>
+        </div>
+
         {displayProducts.length === 0 ? (
           <div className="text-center">
             <p className="text-xl text-blue-100">No hay productos destacados disponibles</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayProducts.map((product, index) => (
-              <div
-                key={product.id}
-                className="transition-all duration-700"
-              >
-                <ProductCard product={product} />
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {displayProducts.map((product, index) => (
+                <div
+                  key={`${product.id}-${currentPage}`}
+                  className={`transition-all duration-700 ${
+                    index === 0
+                      ? "delay-100 animate-fade-in-up"
+                      : index === 1
+                        ? "delay-200 animate-fade-in-up"
+                        : "delay-300 animate-fade-in-up"
+                  }`}
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+
+            {/* Paginación para productos destacados */}
+            {featuredProducts.length > FEATURED_PRODUCTS_PER_PAGE && (
+              <div className="mt-12">
+                <Pagination 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  onPageChange={handlePageChange} 
+                />
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </section>

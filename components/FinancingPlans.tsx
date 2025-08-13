@@ -2,24 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import { PlanFinanciacion } from '@/lib/products'
-import { getPlanesProducto, calcularCuota, formatearPrecio } from '@/lib/supabase-products'
+import { getPlanesProducto, calcularCuota, formatearPrecio, getTipoPlanesProducto } from '@/lib/supabase-products'
 
 interface FinancingPlansProps {
   productoId: string
   precio: number
+  showDebug?: boolean
 }
 
-export default function FinancingPlans({ productoId, precio }: FinancingPlansProps) {
+export default function FinancingPlans({ productoId, precio, showDebug = false }: FinancingPlansProps) {
   const [planes, setPlanes] = useState<PlanFinanciacion[]>([])
   const [loading, setLoading] = useState(true)
+  const [tipoPlanes, setTipoPlanes] = useState<'especificos' | 'default' | 'todos' | 'ninguno'>('ninguno')
 
   useEffect(() => {
     async function loadPlanes() {
       try {
         setLoading(true)
-        const planesData = await getPlanesProducto(productoId)
+        const [planesData, tipoData] = await Promise.all([
+          getPlanesProducto(productoId),
+          getTipoPlanesProducto(productoId)
+        ])
         console.log('Planes cargados para producto', productoId, ':', planesData)
+        console.log('Tipo de planes para producto', productoId, ':', tipoData)
         setPlanes(planesData)
+        setTipoPlanes(tipoData)
       } catch (error) {
         console.error('Error loading financing plans:', error)
       } finally {
@@ -47,6 +54,13 @@ export default function FinancingPlans({ productoId, precio }: FinancingPlansPro
 
   return (
     <div className="mt-3 space-y-2">
+      {/* Información de debug */}
+      {showDebug && (
+        <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+          <strong>Tipo de planes:</strong> {tipoPlanes} | <strong>Total:</strong> {planes.length} planes
+        </div>
+      )}
+      
       {planes.map((plan, index) => {
         const calculo = calcularCuota(precio, plan)
         if (!calculo) return null

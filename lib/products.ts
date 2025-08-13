@@ -31,6 +31,14 @@ export interface ProductoPlan {
   created_at: string
 }
 
+export interface ProductoPlanDefault {
+  id: number
+  fk_id_producto: number
+  fk_id_plan: number
+  activo: boolean
+  created_at: string
+}
+
 export interface FinancingPlan {
   installments: number
   monthlyPayment: number
@@ -43,6 +51,10 @@ export interface Product {
   precio: number
   stock: number
   imagen: string
+  imagen_2?: string
+  imagen_3?: string
+  imagen_4?: string
+  imagen_5?: string
   fk_id_categoria: number
   fk_id_marca: number
   destacado: boolean

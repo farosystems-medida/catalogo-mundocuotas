@@ -32,7 +32,7 @@ export function calcularCuota(precio: number, plan: PlanFinanciacion) {
   }
 }
 
-// Obtener todos los planes de financiación
+// Obtener todos los planes de financiación activos
 export async function getPlanesFinanciacion(): Promise<PlanFinanciacion[]> {
   try {
     const { data, error } = await supabase
@@ -53,40 +53,81 @@ export async function getPlanesFinanciacion(): Promise<PlanFinanciacion[]> {
   }
 }
 
-// Obtener planes disponibles para un producto específico
+// Obtener planes disponibles para un producto específico con priorización y fallback
 export async function getPlanesProducto(productoId: string): Promise<PlanFinanciacion[]> {
   try {
     console.log('🔍 getPlanesProducto: Buscando planes para producto ID:', productoId)
     
-    const { data, error } = await supabase
-      .from('producto_planes')
-      .select(`
-        fk_id_plan,
-        planes_financiacion(*)
-      `)
-      .eq('fk_id_producto', parseInt(productoId))
-      .eq('activo', true)
-      .eq('planes_financiacion.activo', true)
+    // Primero, buscar planes específicos del producto (prioridad alta)
+    try {
+      const { data: planesEspecificos, error: errorEspecificos } = await supabase
+        .from('producto_planes')
+        .select(`
+          fk_id_plan,
+          planes_financiacion(*)
+        `)
+        .eq('fk_id_producto', parseInt(productoId))
+        .eq('activo', true)
+        .eq('planes_financiacion.activo', true)
 
-    console.log('🔍 getPlanesProducto: Respuesta de Supabase:', { data, error })
+      console.log('🔍 getPlanesProducto: Planes específicos encontrados:', planesEspecificos?.length || 0)
 
-    if (error) {
-      console.error('Error fetching product financing plans:', error)
-      return []
+      // Si hay planes específicos, usarlos
+      if (planesEspecificos && planesEspecificos.length > 0) {
+        const planes: PlanFinanciacion[] = []
+        planesEspecificos.forEach(item => {
+          if (item.planes_financiacion) {
+            planes.push(item.planes_financiacion as unknown as PlanFinanciacion)
+          }
+        })
+        
+        console.log('✅ getPlanesProducto: Usando planes específicos:', planes.length, planes)
+        return planes
+      }
+    } catch (error) {
+      console.log('⚠️ getPlanesProducto: Error al buscar planes específicos (tabla puede no existir):', error)
     }
 
-    // Extraer los planes de financiación de la respuesta
-    const planes: PlanFinanciacion[] = []
-    data?.forEach(item => {
-      if (item.planes_financiacion) {
-        planes.push(item.planes_financiacion as unknown as PlanFinanciacion)
-      }
-    })
+    // Si no hay planes específicos, buscar planes por defecto
+    console.log('🔍 getPlanesProducto: Buscando planes por defecto...')
     
-    console.log('✅ getPlanesProducto: Planes encontrados:', planes.length, planes)
-    return planes
+    try {
+      const { data: planesDefault, error: errorDefault } = await supabase
+        .from('productos_planes_default')
+        .select(`
+          fk_id_plan,
+          planes_financiacion(*)
+        `)
+        .eq('fk_id_producto', parseInt(productoId))
+        .eq('activo', true)
+        .eq('planes_financiacion.activo', true)
+
+      console.log('🔍 getPlanesProducto: Planes por defecto encontrados:', planesDefault?.length || 0)
+
+      if (errorDefault) {
+        console.log('⚠️ getPlanesProducto: Error al buscar planes por defecto (tabla puede no existir):', errorDefault)
+      } else if (planesDefault && planesDefault.length > 0) {
+        const planes: PlanFinanciacion[] = []
+        planesDefault.forEach(item => {
+          if (item.planes_financiacion) {
+            planes.push(item.planes_financiacion as unknown as PlanFinanciacion)
+          }
+        })
+        
+        console.log('✅ getPlanesProducto: Usando planes por defecto:', planes.length, planes)
+        return planes
+      }
+    } catch (error) {
+      console.log('⚠️ getPlanesProducto: Error al buscar planes por defecto (tabla puede no existir):', error)
+    }
+
+    // Si no hay planes específicos ni por defecto, usar todos los planes activos como fallback
+    console.log('🔍 getPlanesProducto: Usando todos los planes activos como fallback...')
+    const todosLosPlanes = await getPlanesFinanciacion()
+    console.log('✅ getPlanesProducto: Usando todos los planes activos:', todosLosPlanes.length, todosLosPlanes)
+    return todosLosPlanes
   } catch (error) {
-    console.error('Error fetching product financing plans:', error)
+    console.error('❌ getPlanesProducto: Error general:', error)
     return []
   }
 }
@@ -324,5 +365,62 @@ export async function getBrands(): Promise<Marca[]> {
   } catch (error) {
     console.error('❌ Error fetching brands:', error)
     return []
+  }
+} 
+
+// Función para verificar qué tipo de planes tiene un producto
+export async function getTipoPlanesProducto(productoId: string): Promise<'especificos' | 'default' | 'todos' | 'ninguno'> {
+  try {
+    // Verificar si tiene planes específicos
+    try {
+      const { data: planesEspecificos } = await supabase
+        .from('producto_planes')
+        .select('id')
+        .eq('fk_id_producto', parseInt(productoId))
+        .eq('activo', true)
+        .limit(1)
+
+      if (planesEspecificos && planesEspecificos.length > 0) {
+        return 'especificos'
+      }
+    } catch (error) {
+      console.log('⚠️ getTipoPlanesProducto: Error al verificar planes específicos (tabla puede no existir):', error)
+    }
+
+    // Verificar si tiene planes por defecto
+    try {
+      const { data: planesDefault } = await supabase
+        .from('productos_planes_default')
+        .select('id')
+        .eq('fk_id_producto', parseInt(productoId))
+        .eq('activo', true)
+        .limit(1)
+
+      if (planesDefault && planesDefault.length > 0) {
+        return 'default'
+      }
+    } catch (error) {
+      console.log('⚠️ getTipoPlanesProducto: Error al verificar planes por defecto (tabla puede no existir):', error)
+    }
+
+    // Verificar si hay planes de financiación activos en general
+    try {
+      const { data: todosLosPlanes } = await supabase
+        .from('planes_financiacion')
+        .select('id')
+        .eq('activo', true)
+        .limit(1)
+
+      if (todosLosPlanes && todosLosPlanes.length > 0) {
+        return 'todos'
+      }
+    } catch (error) {
+      console.log('⚠️ getTipoPlanesProducto: Error al verificar planes de financiación (tabla puede no existir):', error)
+    }
+
+    return 'ninguno'
+  } catch (error) {
+    console.error('❌ getTipoPlanesProducto: Error general:', error)
+    return 'ninguno'
   }
 } 

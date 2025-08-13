@@ -10,6 +10,7 @@ import WhatsAppButton from "@/components/WhatsAppButton"
 import GlobalAppBar from "@/components/GlobalAppBar"
 import Footer from "@/components/Footer"
 import ProductCard from "@/components/ProductCard"
+import ProductImageGallery from "@/components/ProductImageGallery"
 
 interface ProductPageProps {
   params: Promise<{
@@ -97,6 +98,15 @@ export default function ProductPage({ params }: ProductPageProps) {
   const productPrice = product.precio || product.price || 0
   const productImage = product.imagen || product.image || "/placeholder.svg"
   const isFeatured = product.destacado || product.featured || false
+  
+  // Recopilar todas las imágenes del producto
+  const productImages = [
+    product.imagen || product.image || "",
+    product.imagen_2 || "",
+    product.imagen_3 || "",
+    product.imagen_4 || "",
+    product.imagen_5 || ""
+  ].filter(img => img && img.trim() !== '')
   const productCategory = typeof product.categoria === 'string' 
     ? product.categoria 
     : product.categoria?.descripcion || product.category || 'Sin categoría'
@@ -120,46 +130,12 @@ export default function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Imagen del Producto */}
-            <div className="relative group">
-              <div className="bg-white rounded-2xl shadow-xl p-8 overflow-hidden">
-                <div className="relative aspect-square">
-                  <Image
-                    src={productImage}
-                    alt={productName}
-                    fill
-                    className="object-contain transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                  />
-                  
-                  {/* Badge Destacado */}
-                  {isFeatured && (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center">
-                      <Star className="mr-2" size={14} />
-                      Destacado
-                    </div>
-                  )}
-
-                  {/* Botones de navegación */}
-                  <button className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white transition-all duration-300">
-                    <ChevronLeft size={20} className="text-gray-700" />
-                  </button>
-                  <button className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white transition-all duration-300">
-                    <ChevronRight size={20} className="text-gray-700" />
-                  </button>
-                </div>
-
-                {/* Thumbnails */}
-                <div className="flex justify-center mt-6 space-x-3">
-                  <div className="w-20 h-20 bg-white border-2 border-violet-500 rounded-xl flex items-center justify-center shadow-md">
-                    <Image src={productImage} alt="Thumbnail" width={70} height={70} className="object-contain" />
-                  </div>
-                  <div className="w-20 h-20 bg-white border border-gray-300 rounded-xl flex items-center justify-center shadow-md">
-                    <Image src={productImage} alt="Thumbnail" width={70} height={70} className="object-contain" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Galería de Imágenes del Producto */}
+            <ProductImageGallery 
+              images={productImages}
+              productName={productName}
+              isFeatured={isFeatured}
+            />
 
             {/* Información Principal */}
             <div className="space-y-8">

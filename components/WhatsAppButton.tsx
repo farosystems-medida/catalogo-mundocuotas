@@ -4,6 +4,8 @@ import { MessageCircle } from "lucide-react"
 import { useState } from "react"
 import type { Product } from "@/lib/products"
 import { useConfiguracion } from "@/hooks/use-configuracion"
+import { useZonas } from "@/hooks/use-zonas"
+import ZonaSelectorDialog from "./ZonaSelectorDialog"
 
 interface WhatsAppButtonProps {
   product: Product
@@ -11,7 +13,9 @@ interface WhatsAppButtonProps {
 
 export default function WhatsAppButton({ product }: WhatsAppButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const { telefono, loading, error } = useConfiguracion()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { telefono, loading: configLoading, error: configError } = useConfiguracion()
+  const { zonas, configuracionZonas, loading: zonasLoading } = useZonas()
   
   // Función para generar el mensaje de WhatsApp
   const generateWhatsAppMessage = (product: Product): string => {
@@ -40,14 +44,27 @@ export default function WhatsAppButton({ product }: WhatsAppButtonProps) {
     
     return message
   }
-  
-  // Número por defecto en caso de que no se pueda cargar desde la base de datos
-  const phoneNumber = telefono || "5491123365608"
-  const message = generateWhatsAppMessage(product)
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+
+  const handleClick = () => {
+    // Verificar si hay zonas configuradas
+    const zonasConTelefono = zonas.filter(zona => 
+      configuracionZonas.some(config => config.fk_id_zona === zona.id)
+    )
+
+    if (zonasConTelefono.length > 0) {
+      // Si hay zonas configuradas, abrir el diálogo de selección
+      setIsDialogOpen(true)
+    } else {
+      // Si no hay zonas configuradas, usar el teléfono por defecto
+      const phoneNumber = telefono || "5491123365608"
+      const message = generateWhatsAppMessage(product)
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+      window.open(whatsappUrl, '_blank')
+    }
+  }
 
   // Si está cargando, mostrar un botón deshabilitado
-  if (loading) {
+  if (configLoading || zonasLoading) {
     return (
       <button
         disabled
@@ -59,37 +76,43 @@ export default function WhatsAppButton({ product }: WhatsAppButtonProps) {
     )
   }
 
-  // Si hay error, mostrar el botón con el número por defecto
-  if (error) {
-    console.warn('Error al cargar configuración, usando número por defecto:', error)
+  // Si hay error en la configuración, mostrar el botón con el número por defecto
+  if (configError) {
+    console.warn('Error al cargar configuración, usando número por defecto:', configError)
   }
 
   return (
-    <a
-      href={whatsappUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="relative w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center transition-all duration-300 text-lg shadow-lg hover:shadow-2xl transform hover:scale-105 overflow-hidden group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Efecto de onda */}
-      <div
-        className={`absolute inset-0 bg-white/20 transform transition-transform duration-500 ${
-          isHovered ? "translate-x-0" : "-translate-x-full"
-        }`}
-      ></div>
+    <>
+      <button
+        onClick={handleClick}
+        className="relative w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center transition-all duration-300 text-lg shadow-lg hover:shadow-2xl transform hover:scale-105 overflow-hidden group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Efecto de onda */}
+        <div
+          className={`absolute inset-0 bg-white/20 transform transition-transform duration-500 ${
+            isHovered ? "translate-x-0" : "-translate-x-full"
+          }`}
+        ></div>
 
-      <MessageCircle className={`mr-3 transition-all duration-300 ${isHovered ? "animate-bounce" : ""}`} size={24} />
+        <MessageCircle className={`mr-3 transition-all duration-300 ${isHovered ? "animate-bounce" : ""}`} size={24} />
 
-      <span className="relative z-10">Consultar Producto por WhatsApp</span>
+        <span className="relative z-10">Consultar Producto por WhatsApp</span>
 
-      {/* Partículas animadas */}
-      <div
-        className={`absolute top-2 right-4 w-2 h-2 bg-white rounded-full transition-all duration-300 ${
-          isHovered ? "animate-ping" : "opacity-0"
-        }`}
-      ></div>
-    </a>
+        {/* Partículas animadas */}
+        <div
+          className={`absolute top-2 right-4 w-2 h-2 bg-white rounded-full transition-all duration-300 ${
+            isHovered ? "animate-ping" : "opacity-0"
+          }`}
+        ></div>
+      </button>
+
+      <ZonaSelectorDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        product={product}
+      />
+    </>
   )
 }

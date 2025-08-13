@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   description:
     "Tu tienda de electrodomésticos de confianza con los mejores planes de financiación. Heladeras, lavarropas, aires acondicionados y más.",
   keywords: "electrodomésticos, cuotas, financiación, heladeras, lavarropas, aires acondicionados",
-    generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/logo.svg',
+  },
 }
 
 export default function RootLayout({

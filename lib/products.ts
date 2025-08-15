@@ -18,9 +18,21 @@ export interface PlanFinanciacion {
   recargo_fijo: number
   monto_minimo: number
   monto_maximo?: number
+  anticipo_minimo?: number
+  anticipo_minimo_fijo?: number
   activo: boolean
   created_at: string
   updated_at: string
+}
+
+export interface PlanCategoria {
+  id: number
+  fk_id_plan: number
+  fk_id_categoria: number
+  activo: boolean
+  created_at: string
+  plan?: PlanFinanciacion
+  categoria?: Categoria
 }
 
 export interface ProductoPlan {
@@ -58,6 +70,10 @@ export interface Product {
   fk_id_categoria: number
   fk_id_marca: number
   destacado: boolean
+  // Nuevos campos para configuración de planes
+  aplicar_todos_planes?: boolean
+  aplicar_planes_categoria?: boolean
+  aplicar_planes_especiales?: boolean
   created_at?: string
   updated_at?: string
   

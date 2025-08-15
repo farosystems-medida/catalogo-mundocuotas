@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { PlanFinanciacion } from '@/lib/products'
-import { getPlanesProducto, calcularCuota, formatearPrecio, getTipoPlanesProducto } from '@/lib/supabase-products'
+import { getPlanesProducto, calcularCuota, formatearPrecio, getTipoPlanesProducto, calcularAnticipo } from '@/lib/supabase-products'
 
 interface FinancingPlansProps {
   productoId: string
@@ -13,7 +13,7 @@ interface FinancingPlansProps {
 export default function FinancingPlans({ productoId, precio, showDebug = false }: FinancingPlansProps) {
   const [planes, setPlanes] = useState<PlanFinanciacion[]>([])
   const [loading, setLoading] = useState(true)
-  const [tipoPlanes, setTipoPlanes] = useState<'especificos' | 'default' | 'todos' | 'ninguno'>('ninguno')
+  const [tipoPlanes, setTipoPlanes] = useState<'especiales' | 'default' | 'todos' | 'ninguno'>('ninguno')
 
   useEffect(() => {
     async function loadPlanes() {
@@ -25,6 +25,7 @@ export default function FinancingPlans({ productoId, precio, showDebug = false }
         ])
         console.log('Planes cargados para producto', productoId, ':', planesData)
         console.log('Tipo de planes para producto', productoId, ':', tipoData)
+        
         setPlanes(planesData)
         setTipoPlanes(tipoData)
       } catch (error) {
@@ -49,6 +50,20 @@ export default function FinancingPlans({ productoId, precio, showDebug = false }
     return null
   }
 
+  // Función para obtener el texto descriptivo del tipo de planes
+  const getTipoPlanesText = (tipo: string) => {
+    switch (tipo) {
+      case 'especiales':
+        return 'Planes Especiales'
+      case 'default':
+        return 'Planes por Defecto'
+      case 'todos':
+        return 'Todos los Planes'
+      default:
+        return 'Sin Planes'
+    }
+  }
+
   // Mostrar todos los planes disponibles para este producto
   const colores = ['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-purple-100 text-purple-800', 'bg-orange-100 text-orange-800']
 
@@ -57,12 +72,13 @@ export default function FinancingPlans({ productoId, precio, showDebug = false }
       {/* Información de debug */}
       {showDebug && (
         <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-          <strong>Tipo de planes:</strong> {tipoPlanes} | <strong>Total:</strong> {planes.length} planes
+          <strong>Tipo de planes:</strong> {getTipoPlanesText(tipoPlanes)} | <strong>Total:</strong> {planes.length} planes
         </div>
       )}
       
       {planes.map((plan, index) => {
         const calculo = calcularCuota(precio, plan)
+        const anticipo = calcularAnticipo(precio, plan)
         if (!calculo) return null
 
         return (
@@ -72,7 +88,14 @@ export default function FinancingPlans({ productoId, precio, showDebug = false }
               colores[index % colores.length]
             }`}
           >
-            {plan.cuotas} CUOTAS MENSUALES x ${formatearPrecio(calculo.cuota_mensual)}
+            <div className="mb-1">
+              {plan.cuotas} CUOTAS MENSUALES x ${formatearPrecio(calculo.cuota_mensual)}
+            </div>
+            {anticipo > 0 && (
+              <div className="text-xs font-normal opacity-90">
+                Anticipo: ${formatearPrecio(anticipo)}
+              </div>
+            )}
           </div>
         )
       })}

@@ -138,11 +138,10 @@ export async function getPlanesProducto(productoId: string): Promise<PlanFinanci
       console.log('⚠️ getPlanesProducto: Error al buscar planes por defecto (tabla puede no existir):', error)
     }
 
-    // 3. FALLBACK: Si no hay planes especiales ni por defecto, usar todos los planes activos
-    console.log('🔍 getPlanesProducto: No hay planes específicos, usando todos los planes activos...')
-    const todosLosPlanes = await getPlanesFinanciacion()
-    console.log('✅ getPlanesProducto: Usando todos los planes activos:', todosLosPlanes.length, todosLosPlanes.map(p => p.cuotas))
-    return todosLosPlanes
+    // 3. FALLBACK: Si no hay planes especiales ni por defecto, no mostrar ningún plan
+    console.log('🔍 getPlanesProducto: No hay planes específicos ni por defecto para este producto')
+    console.log('✅ getPlanesProducto: No se mostrarán planes de financiación')
+    return []
   } catch (error) {
     console.error('❌ getPlanesProducto: Error general:', error)
     return []
@@ -418,21 +417,7 @@ export async function getTipoPlanesProducto(productoId: string): Promise<'especi
       console.log('⚠️ getTipoPlanesProducto: Error al verificar planes por defecto (tabla puede no existir):', error)
     }
 
-    // 3. Verificar si hay planes de financiación activos en general
-    try {
-      const { data: todosLosPlanes } = await supabase
-        .from('planes_financiacion')
-        .select('id')
-        .eq('activo', true)
-        .limit(1)
-
-      if (todosLosPlanes && todosLosPlanes.length > 0) {
-        return 'todos'
-      }
-    } catch (error) {
-      console.log('⚠️ getTipoPlanesProducto: Error al verificar planes de financiación (tabla puede no existir):', error)
-    }
-
+    // 3. Si no hay planes especiales ni por defecto, no hay planes para este producto
     return 'ninguno'
   } catch (error) {
     console.error('❌ getTipoPlanesProducto: Error general:', error)

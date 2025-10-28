@@ -14,13 +14,14 @@ export default function FeaturedSection() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [currentMobilePage, setCurrentMobilePage] = useState(0)
   const [tituloSeccion, setTituloSeccion] = useState<string>('Productos Destacados')
   const scrollRef = useRef<HTMLDivElement>(null)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
-  const [scrollPosition, setScrollPosition] = useState(0)
+  const mobileAutoplayRef = useRef<NodeJS.Timeout | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
-  const [scrollLeft, setScrollLeft] = useState(0)
+  const [startScrollLeft, setStartScrollLeft] = useState(0)
 
 
   // Cargar productos destacados y título
@@ -66,56 +67,51 @@ export default function FeaturedSection() {
     }
   }, [featuredProducts.length])
 
-  // Scroll infinito suave para móviles (solo cuando no está arrastrando)
+  // Autoplay para móviles - cambiar cada 5 segundos mostrando 2 productos
   useEffect(() => {
-    if (!scrollRef.current || featuredProducts.length === 0 || isDragging) return
+    if (featuredProducts.length <= 2) return
 
-    const cardWidth = 240 // 56 * 4 (w-56 = 224px + gap-4 = 16px)
-    const totalWidth = cardWidth * featuredProducts.length
-    let animationId: number
+    const totalMobilePages = Math.ceil(featuredProducts.length / 2)
 
-    const scroll = () => {
-      setScrollPosition((prev) => {
-        const newPosition = prev + 0.5 // Velocidad de scroll
-        // Resetear cuando llega al final del primer set
-        return newPosition >= totalWidth ? 0 : newPosition
-      })
-      animationId = requestAnimationFrame(scroll)
-    }
-
-    animationId = requestAnimationFrame(scroll)
+    mobileAutoplayRef.current = setInterval(() => {
+      setCurrentMobilePage((prev) => (prev + 1) % totalMobilePages)
+    }, 5000)
 
     return () => {
-      cancelAnimationFrame(animationId)
+      if (mobileAutoplayRef.current) {
+        clearInterval(mobileAutoplayRef.current)
+      }
     }
-  }, [featuredProducts.length, isDragging])
+  }, [featuredProducts.length])
 
-  // Manejadores de eventos táctiles y mouse
+  // Manejadores de eventos táctiles y mouse para scroll manual
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return
     setIsDragging(true)
     setStartX(e.pageX)
-    setScrollLeft(scrollPosition)
+    setStartScrollLeft(scrollRef.current.scrollLeft)
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (!scrollRef.current) return
     setIsDragging(true)
     setStartX(e.touches[0].pageX)
-    setScrollLeft(scrollPosition)
+    setStartScrollLeft(scrollRef.current.scrollLeft)
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
+    if (!isDragging || !scrollRef.current) return
     e.preventDefault()
     const x = e.pageX
-    const walk = (startX - x) * 2
-    setScrollPosition(scrollLeft + walk)
+    const walk = (x - startX) * 2
+    scrollRef.current.scrollLeft = startScrollLeft - walk
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return
+    if (!isDragging || !scrollRef.current) return
     const x = e.touches[0].pageX
-    const walk = (startX - x) * 2
-    setScrollPosition(scrollLeft + walk)
+    const walk = (x - startX) * 2
+    scrollRef.current.scrollLeft = startScrollLeft - walk
   }
 
   const handleMouseUp = () => {
@@ -125,6 +121,17 @@ export default function FeaturedSection() {
   const handleTouchEnd = () => {
     setIsDragging(false)
   }
+
+  // Sincronizar scroll con la página actual en móviles
+  useEffect(() => {
+    if (!scrollRef.current) return
+    const cardWidth = 240 // w-56 (224px) + gap-4 (16px)
+    const scrollPosition = currentMobilePage * cardWidth * 2
+    scrollRef.current.scrollTo({
+      left: scrollPosition,
+      behavior: 'smooth'
+    })
+  }, [currentMobilePage])
 
 
   if (loading) {
@@ -214,10 +221,10 @@ export default function FeaturedSection() {
           </div>
         ) : (
           <>
-            {/* Carrusel para móviles - scroll automático infinito con arrastre */}
+            {/* Carrusel para móviles - 2 productos a la vez con cambio cada 5 segundos */}
             <div className="md:hidden">
               <div
-                className="overflow-hidden pb-4 cursor-grab active:cursor-grabbing"
+                className="overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing"
                 ref={scrollRef}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -227,13 +234,10 @@ export default function FeaturedSection() {
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
-                <div
-                  className={`flex gap-4 px-4 ${isDragging ? '' : 'transition-transform duration-100 ease-linear'}`}
-                  style={{ transform: `translateX(-${scrollPosition}px)` }}
-                >
-                  {[...featuredProducts, ...featuredProducts].map((product, index) => (
+                <div className="flex gap-4 px-4">
+                  {featuredProducts.map((product) => (
                     <div
-                      key={`${product.id}-${index}`}
+                      key={product.id}
                       className="flex-shrink-0 w-56"
                     >
                       <ProductCard product={product} />

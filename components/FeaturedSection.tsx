@@ -17,6 +17,10 @@ export default function FeaturedSection() {
   const [tituloSeccion, setTituloSeccion] = useState<string>('Productos Destacados')
   const scrollRef = useRef<HTMLDivElement>(null)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
 
 
   // Cargar productos destacados y título
@@ -42,7 +46,7 @@ export default function FeaturedSection() {
     loadData()
   }, [])
 
-  // Autoplay para cambiar de página automáticamente (desktop y mobile)
+  // Autoplay para cambiar de página automáticamente (desktop)
   useEffect(() => {
     const totalPages = Math.ceil(featuredProducts.length / FEATURED_PRODUCTS_PER_PAGE)
 
@@ -61,6 +65,66 @@ export default function FeaturedSection() {
       }
     }
   }, [featuredProducts.length])
+
+  // Scroll infinito suave para móviles (solo cuando no está arrastrando)
+  useEffect(() => {
+    if (!scrollRef.current || featuredProducts.length === 0 || isDragging) return
+
+    const cardWidth = 240 // 56 * 4 (w-56 = 224px + gap-4 = 16px)
+    const totalWidth = cardWidth * featuredProducts.length
+    let animationId: number
+
+    const scroll = () => {
+      setScrollPosition((prev) => {
+        const newPosition = prev + 0.5 // Velocidad de scroll
+        // Resetear cuando llega al final del primer set
+        return newPosition >= totalWidth ? 0 : newPosition
+      })
+      animationId = requestAnimationFrame(scroll)
+    }
+
+    animationId = requestAnimationFrame(scroll)
+
+    return () => {
+      cancelAnimationFrame(animationId)
+    }
+  }, [featuredProducts.length, isDragging])
+
+  // Manejadores de eventos táctiles y mouse
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    setStartX(e.pageX)
+    setScrollLeft(scrollPosition)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    setStartX(e.touches[0].pageX)
+    setScrollLeft(scrollPosition)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    e.preventDefault()
+    const x = e.pageX
+    const walk = (startX - x) * 2
+    setScrollPosition(scrollLeft + walk)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const x = e.touches[0].pageX
+    const walk = (startX - x) * 2
+    setScrollPosition(scrollLeft + walk)
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+  }
 
 
   if (loading) {
@@ -150,20 +214,27 @@ export default function FeaturedSection() {
           </div>
         ) : (
           <>
-            {/* Carrusel para móviles - con rotación automática */}
+            {/* Carrusel para móviles - scroll automático infinito con arrastre */}
             <div className="md:hidden">
-              <div className="overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
-                <div className="flex gap-4 px-4">
-                  {displayProducts.map((product, index) => (
+              <div
+                className="overflow-hidden pb-4 cursor-grab active:cursor-grabbing"
+                ref={scrollRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <div
+                  className={`flex gap-4 px-4 ${isDragging ? '' : 'transition-transform duration-100 ease-linear'}`}
+                  style={{ transform: `translateX(-${scrollPosition}px)` }}
+                >
+                  {[...featuredProducts, ...featuredProducts].map((product, index) => (
                     <div
-                      key={`${product.id}-${currentPage}`}
-                      className={`flex-shrink-0 w-56 transition-all duration-700 ${
-                        index === 0
-                          ? "delay-100 animate-fade-in-up"
-                          : index === 1
-                            ? "delay-200 animate-fade-in-up"
-                            : "delay-300 animate-fade-in-up"
-                      }`}
+                      key={`${product.id}-${index}`}
+                      className="flex-shrink-0 w-56"
                     >
                       <ProductCard product={product} />
                     </div>

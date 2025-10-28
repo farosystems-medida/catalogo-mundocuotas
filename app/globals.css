@@ -394,12 +394,12 @@ html {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-33.33%);
+    transform: translateX(-33.333%);
   }
 }
 
 .animate-scroll-infinite {
-  animation: scroll-infinite 30s linear infinite;
+  animation: scroll-infinite 10s linear infinite;
 }
 
 .animate-scroll-infinite:hover {

@@ -67,7 +67,7 @@ export default function FeaturedSection() {
     }
   }, [featuredProducts.length])
 
-  // Autoplay para móviles - cambiar cada 5 segundos mostrando 2 productos
+  // Autoplay para móviles - cambiar cada 2 segundos mostrando 2 productos
   useEffect(() => {
     if (featuredProducts.length <= 2) return
 
@@ -75,7 +75,7 @@ export default function FeaturedSection() {
 
     mobileAutoplayRef.current = setInterval(() => {
       setCurrentMobilePage((prev) => (prev + 1) % totalMobilePages)
-    }, 5000)
+    }, 2000)
 
     return () => {
       if (mobileAutoplayRef.current) {

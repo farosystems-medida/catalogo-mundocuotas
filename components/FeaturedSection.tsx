@@ -16,6 +16,7 @@ export default function FeaturedSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const [tituloSeccion, setTituloSeccion] = useState<string>('Productos Destacados')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const autoplayRef = useRef<NodeJS.Timeout | null>(null)
 
 
   // Cargar productos destacados y título
@@ -40,6 +41,26 @@ export default function FeaturedSection() {
 
     loadData()
   }, [])
+
+  // Autoplay para cambiar de página automáticamente
+  useEffect(() => {
+    const totalPages = Math.ceil(featuredProducts.length / FEATURED_PRODUCTS_PER_PAGE)
+
+    if (featuredProducts.length > FEATURED_PRODUCTS_PER_PAGE) {
+      autoplayRef.current = setInterval(() => {
+        setCurrentPage((prevPage) => {
+          const nextPage = prevPage >= totalPages ? 1 : prevPage + 1
+          return nextPage
+        })
+      }, 5000) // Cambia cada 5 segundos
+
+      return () => {
+        if (autoplayRef.current) {
+          clearInterval(autoplayRef.current)
+        }
+      }
+    }
+  }, [featuredProducts.length])
 
 
   if (loading) {

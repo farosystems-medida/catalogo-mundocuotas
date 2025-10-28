@@ -42,7 +42,7 @@ export default function FeaturedSection() {
     loadData()
   }, [])
 
-  // Autoplay para cambiar de página automáticamente
+  // Autoplay para cambiar de página automáticamente (desktop y mobile)
   useEffect(() => {
     const totalPages = Math.ceil(featuredProducts.length / FEATURED_PRODUCTS_PER_PAGE)
 
@@ -52,7 +52,7 @@ export default function FeaturedSection() {
           const nextPage = prevPage >= totalPages ? 1 : prevPage + 1
           return nextPage
         })
-      }, 5000) // Cambia cada 5 segundos
+      }, 10000) // Cambia cada 10 segundos
 
       return () => {
         if (autoplayRef.current) {
@@ -150,14 +150,20 @@ export default function FeaturedSection() {
           </div>
         ) : (
           <>
-            {/* Carrusel para móviles */}
+            {/* Carrusel para móviles - con rotación automática */}
             <div className="md:hidden">
-              <div className="overflow-x-auto pb-4 scrollbar-hide">
+              <div className="overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
                 <div className="flex gap-4 px-4">
-                  {featuredProducts.map((product) => (
+                  {displayProducts.map((product, index) => (
                     <div
-                      key={product.id}
-                      className="flex-shrink-0 w-56"
+                      key={`${product.id}-${currentPage}`}
+                      className={`flex-shrink-0 w-56 transition-all duration-700 ${
+                        index === 0
+                          ? "delay-100 animate-fade-in-up"
+                          : index === 1
+                            ? "delay-200 animate-fade-in-up"
+                            : "delay-300 animate-fade-in-up"
+                      }`}
                     >
                       <ProductCard product={product} />
                     </div>

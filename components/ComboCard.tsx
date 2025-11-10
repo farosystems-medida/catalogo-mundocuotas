@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Heart, Clock } from "lucide-react"
 import { Combo } from "@/lib/products"
 import { useShoppingList } from "@/hooks/use-shopping-list"
@@ -54,10 +55,13 @@ export default function ComboCard({ combo }: ComboCardProps) {
       }`}>
         {/* Imagen del combo */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <Image
             src={combo.imagen || '/placeholder.jpg'}
             alt={combo.nombre}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 256px, (max-width: 1024px) 33vw, 400px"
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
+            priority={false}
           />
 
           {/* Icono de Favoritos - Esquina superior izquierda (solo si está vigente) */}

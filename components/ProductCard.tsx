@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Heart } from "lucide-react"
 import { Product } from "@/lib/products"
 import FinancingPlans from "./FinancingPlans"
@@ -49,10 +50,13 @@ export default function ProductCard({ product }: ProductCardProps) {
       }`}>
         {/* Imagen del producto */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <Image
             src={product.imagen || product.image || '/placeholder.jpg'}
             alt={product.descripcion || product.name || 'Producto'}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
+            priority={false}
           />
 
           {/* Icono de Favoritos - Esquina superior izquierda (solo si hay stock) */}

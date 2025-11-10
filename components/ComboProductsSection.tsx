@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Heart, Package } from "lucide-react"
 import { ComboProducto } from "@/lib/products"
 import { useShoppingList } from "@/hooks/use-shopping-list"
@@ -121,10 +122,13 @@ function ProductCard({ producto, cantidad, onFavoriteClick }: ProductCardProps) 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group cursor-pointer hover:shadow-xl hover:scale-105 active:scale-95">
         {/* Imagen del producto */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <Image
             src={producto.imagen || '/placeholder.jpg'}
             alt={producto.descripcion}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 256px, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
+            priority={false}
           />
 
           {/* Badge de cantidad */}

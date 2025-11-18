@@ -27,22 +27,14 @@ export async function generateMetadata({ params }: ComboPageProps): Promise<Meta
     }
 
     // Obtener imagen del combo
-    const comboImage = combo.imagen || combo.imagen_2 || combo.imagen_3 || combo.imagen_4 || combo.imagen_5 || '/placeholder.jpg'
+    const comboImage = (combo.imagen || combo.imagen_2 || combo.imagen_3 || combo.imagen_4 || combo.imagen_5 || '/placeholder.jpg').trim()
 
     let imageUrl: string
 
     if (comboImage && (comboImage.startsWith('http://') || comboImage.startsWith('https://'))) {
-      // URL absoluta - usar proxy para Supabase (WhatsApp no acepta Supabase directo)
-      if (comboImage.includes('supabase.co')) {
-        // Supabase SIEMPRE con proxy + timestamp
-        const proxiedUrl = `https://www.mundocuota.com.ar/api/image-proxy?url=${encodeURIComponent(comboImage)}`
-        imageUrl = `${proxiedUrl}&t=${Date.now()}`
-      } else {
-        // URLs externas como mlstatic funcionan directamente
-        imageUrl = comboImage.includes('?')
-          ? `${comboImage}&v=${Date.now()}`
-          : `${comboImage}?v=${Date.now()}`
-      }
+      // URL absoluta - TODAS las URLs externas pasan por proxy para garantizar compatibilidad con redes sociales
+      const proxiedUrl = `https://www.mundocuota.com.ar/api/image-proxy?url=${encodeURIComponent(comboImage)}`
+      imageUrl = `${proxiedUrl}&t=${Date.now()}`
     } else if (comboImage && comboImage.startsWith('/')) {
       // URL relativa que empieza con /
       imageUrl = `https://www.mundocuota.com.ar${comboImage}?v=${Date.now()}`

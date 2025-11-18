@@ -24,23 +24,15 @@ export async function generateMetadata({ params }: ProductoVariosPageProps): Pro
     }
 
     // Obtener la primera imagen del producto
-    const productImage = product.imagen || product.imagen_2 || product.imagen_3 || product.imagen_4 || product.imagen_5 || '/placeholder.jpg'
+    const productImage = (product.imagen || product.imagen_2 || product.imagen_3 || product.imagen_4 || product.imagen_5 || '/placeholder.jpg').trim()
 
-    // Construir la URL completa de la imagen
+    // Construir la URL completa de la imagen - TODAS las URLs externas pasan por proxy
     let imageUrl: string
 
     if (productImage.startsWith('http://') || productImage.startsWith('https://')) {
-      // URL absoluta - usar proxy para Supabase (WhatsApp no acepta Supabase directo)
-      if (productImage.includes('supabase.co')) {
-        // Supabase SIEMPRE con proxy + timestamp
-        const proxiedUrl = `https://www.mundocuota.com.ar/api/image-proxy?url=${encodeURIComponent(productImage)}`
-        imageUrl = `${proxiedUrl}&t=${Date.now()}`
-      } else {
-        // URLs externas como mlstatic funcionan directamente
-        imageUrl = productImage.includes('?')
-          ? `${productImage}&v=${Date.now()}`
-          : `${productImage}?v=${Date.now()}`
-      }
+      // URL absoluta - TODAS las URLs externas pasan por proxy para garantizar compatibilidad con redes sociales
+      const proxiedUrl = `https://www.mundocuota.com.ar/api/image-proxy?url=${encodeURIComponent(productImage)}`
+      imageUrl = `${proxiedUrl}&t=${Date.now()}`
     } else if (productImage.startsWith('/')) {
       // URL relativa que empieza con /
       imageUrl = `https://www.mundocuota.com.ar${productImage}?v=${Date.now()}`

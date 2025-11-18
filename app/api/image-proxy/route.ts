@@ -12,12 +12,21 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Missing url parameter', { status: 400 })
     }
 
-    // Permitir URLs de Supabase y PostImages para seguridad
-    const allowedDomains = ['supabase.co', 'postimages.org', 'postimg.cc', 'i.postimg.cc']
+    // Permitir URLs de dominios confiables
+    const allowedDomains = [
+      'supabase.co',
+      'postimages.org',
+      'postimg.cc',
+      'i.postimg.cc',
+      'store.midea.com.ar',
+      'daewooherramientas.com.ar',
+      'mlstatic.com',
+      'http2.mlstatic.com'
+    ]
     const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain))
 
     if (!isAllowed) {
-      console.log('❌ Image Proxy - Invalid URL (not from allowed domains)')
+      console.log('❌ Image Proxy - Invalid URL (not from allowed domains):', imageUrl)
       return new NextResponse('Invalid URL', { status: 400 })
     }
 
@@ -34,6 +43,12 @@ export async function GET(request: NextRequest) {
     if (imageUrl.includes('postimg')) {
       headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Referer'] = 'https://postimages.org/'
+      headers['Sec-Fetch-Dest'] = 'image'
+      headers['Sec-Fetch-Mode'] = 'no-cors'
+      headers['Sec-Fetch-Site'] = 'cross-site'
+    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar')) {
+      // Para sitios de tiendas, usar headers de navegador para evitar bloqueos
+      headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'

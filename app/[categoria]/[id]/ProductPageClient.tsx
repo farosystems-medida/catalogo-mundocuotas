@@ -29,20 +29,22 @@ export default function ProductPageClient({ params }: ProductPageClientProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const { products, categories } = useProducts()
+  const { products, categories, loading: productsLoading } = useProducts()
 
   // Encontrar la categoría por slug
-  const categoria = categories.find(cat => {
-    const slug = cat.descripcion?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-    return slug === resolvedParams.categoria
-  })
+  const categoria = useMemo(() => {
+    return categories.find(cat => {
+      const slug = cat.descripcion?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+      return slug === resolvedParams.categoria
+    })
+  }, [categories, resolvedParams.categoria])
 
   // Productos relacionados de la misma categoría
   const relatedProducts = useMemo(() => {
     if (!product || !categoria) return []
-    
+
     return products
       .filter(p => p.fk_id_categoria === categoria.id && p.id !== product.id)
       .slice(0, 6) // Mostrar máximo 6 productos relacionados
@@ -50,19 +52,24 @@ export default function ProductPageClient({ params }: ProductPageClientProps) {
 
   useEffect(() => {
     const loadProduct = async () => {
+      // Esperar a que las categorías se carguen
+      if (productsLoading || categories.length === 0) {
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
-        
+
         const productData = await getProductById(resolvedParams.id)
-        
+
         if (!productData) {
           setError('Producto no encontrado')
           return
         }
 
         // Verificar que el producto pertenece a la categoría correcta
-        if (productData.fk_id_categoria !== categoria?.id) {
+        if (categoria && productData.fk_id_categoria !== categoria.id) {
           setError('El producto no pertenece a esta categoría')
           return
         }
@@ -76,10 +83,8 @@ export default function ProductPageClient({ params }: ProductPageClientProps) {
       }
     }
 
-    if (categoria) {
-      loadProduct()
-    }
-  }, [resolvedParams.id, categoria])
+    loadProduct()
+  }, [resolvedParams.id, categoria, productsLoading, categories.length])
 
   const handleBackToCategory = () => {
     router.push(`/${resolvedParams.categoria}`)

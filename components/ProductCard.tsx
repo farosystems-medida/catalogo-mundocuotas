@@ -25,10 +25,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const isInFavorites = isInList(product.id)
   const hasStock = product.tiene_stock === true // Solo true permite agregar, undefined/null/false no permiten
-  
-  // Debug: log del stock
-  console.log('🔍 ProductCard - Product:', product.descripcion, 'tiene_stock:', product.tiene_stock, 'hasStock:', hasStock)
-  console.log('🔍 ProductCard - Tipo de tiene_stock:', typeof product.tiene_stock)
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -41,6 +37,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  // Limpiar URL de imagen (remover espacios al final)
+  const cleanImageUrl = (url: string | undefined) => {
+    if (!url) return '/placeholder.jpg'
+    return url.trim()
+  }
+
   return (
     <Link href={productUrl} className="block">
       <div className={`bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 group cursor-pointer ${
@@ -51,7 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Imagen del producto */}
         <div className="relative aspect-square overflow-hidden">
           <Image
-            src={product.imagen || product.image || '/placeholder.jpg'}
+            src={cleanImageUrl(product.imagen || product.image)}
             alt={product.descripcion || product.name || 'Producto'}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"

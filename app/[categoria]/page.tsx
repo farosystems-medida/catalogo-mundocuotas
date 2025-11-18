@@ -74,9 +74,7 @@ export default function CategoriaPage({ params }: CategoriaPageProps) {
 
       try {
         setCombosLoading(true)
-        console.log('🔍 Cargando combos para categoría:', categoria.id)
         const combosData = await getCombosByCategory(categoria.id)
-        console.log('🔍 Combos cargados:', combosData.length)
         setCombos(combosData)
       } catch (error) {
         console.error('Error loading combos:', error)
@@ -88,13 +86,6 @@ export default function CategoriaPage({ params }: CategoriaPageProps) {
 
     loadCombos()
   }, [categoria])
-
-  // Debug: Log para verificar que los datos se cargan
-  useEffect(() => {
-    console.log('🔍 Categoría encontrada:', categoria?.descripcion)
-    console.log('🔍 Productos filtrados:', filteredProducts.length)
-    console.log('🔍 Combos filtrados:', combos.length)
-  }, [categoria, filteredProducts, combos])
 
   // Combinar productos y combos para mostrar juntos
   const allItems = useMemo(() => {

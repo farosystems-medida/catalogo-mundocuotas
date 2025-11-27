@@ -25,7 +25,10 @@ export async function GET(request: NextRequest) {
       'http2.mlstatic.com',
       'nataliahogar.com.ar',
       'megatone.net',
-      'philco.com.ar'
+      'philco.com.ar',
+      'indelplas.com',
+      'arcencohogar.vtexassets.com',
+      'arbghprod.vtexassets.com'
     ]
     const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain))
 

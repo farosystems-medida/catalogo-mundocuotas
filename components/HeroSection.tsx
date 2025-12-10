@@ -5,35 +5,58 @@ import TypewriterText from "./TypewriterText"
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const [snowflakes, setSnowflakes] = useState<Array<{ id: number; left: number; delay: number; duration: number; size: number }>>([])
 
   useEffect(() => {
     setIsVisible(true)
+
+    // Generar copos de nieve
+    const flakes = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 5 + Math.random() * 10,
+      size: 2 + Math.random() * 4
+    }))
+    setSnowflakes(flakes)
   }, [])
 
   return (
     <section
       id="inicio"
-      className="relative text-white pt-12 overflow-hidden h-[30vh] min-h-[250px] sm:h-[35vh] sm:min-h-[300px] flex items-center"
+      className="relative text-white pt-12 h-[30vh] min-h-[250px] sm:h-[35vh] sm:min-h-[300px] flex items-center"
+      style={{ overflow: 'visible' }}
     >
       {/* Imagen de fondo */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: "url('/hero-family.svg')"
+          backgroundImage: "url('/navidad.png')"
         }}
       >
         {/* Overlay mejorado para mayor calidad visual */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-purple-900/50 to-blue-900/60"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+
+        {/* Efecto de copos de nieve */}
+        {snowflakes.map((flake) => (
+          <div
+            key={flake.id}
+            className="absolute text-white"
+            style={{
+              left: `${flake.left}%`,
+              top: '-10px',
+              animation: `fall ${flake.duration}s linear ${flake.delay}s infinite`,
+              fontSize: `${flake.size * 3}px`,
+              opacity: 0.9,
+              textShadow: '0 0 5px rgba(255,255,255,0.8)'
+            }}
+          >
+            ❄
+          </div>
+        ))}
       </div>
 
-      {/* Fondo animado con partículas */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-10 left-10 w-4 h-4 bg-yellow-400 rounded-full animate-float"></div>
-        <div className="absolute top-32 right-20 w-6 h-6 bg-blue-300 rounded-full animate-float delay-200"></div>
-        <div className="absolute bottom-20 left-1/4 w-3 h-3 bg-green-400 rounded-full animate-float delay-500"></div>
-        <div className="absolute bottom-40 right-1/3 w-5 h-5 bg-purple-400 rounded-full animate-float delay-700"></div>
-      </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 md:py-6">
         <div className={`text-center transition-all duration-1000 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>

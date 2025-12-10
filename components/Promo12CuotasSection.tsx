@@ -89,6 +89,22 @@ export default function Promo12CuotasSection() {
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-violet-400 rounded-full blur-3xl animate-float delay-200"></div>
+        {/* Copos de nieve */}
+        {Array.from({ length: 30 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-white"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: '-10px',
+              animation: `fall ${5 + Math.random() * 10}s linear ${Math.random() * 5}s infinite`,
+              fontSize: `${8 + Math.random() * 8}px`,
+              opacity: 0.6
+            }}
+          >
+            ❄
+          </div>
+        ))}
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

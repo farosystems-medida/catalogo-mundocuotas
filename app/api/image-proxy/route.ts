@@ -28,7 +28,8 @@ export async function GET(request: NextRequest) {
       'philco.com.ar',
       'indelplas.com',
       'arcencohogar.vtexassets.com',
-      'arbghprod.vtexassets.com'
+      'arbghprod.vtexassets.com',
+      'ken-brown.com.ar'
     ]
     const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain))
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'
-    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar') || imageUrl.includes('escorial.com.ar') || imageUrl.includes('nataliahogar.com.ar') || imageUrl.includes('megatone.net') || imageUrl.includes('philco.com.ar')) {
+    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar') || imageUrl.includes('escorial.com.ar') || imageUrl.includes('nataliahogar.com.ar') || imageUrl.includes('megatone.net') || imageUrl.includes('philco.com.ar') || imageUrl.includes('ken-brown.com.ar')) {
       // Para sitios de tiendas, usar headers de navegador para evitar bloqueos
       headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Sec-Fetch-Dest'] = 'image'

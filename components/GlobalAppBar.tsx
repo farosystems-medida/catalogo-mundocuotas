@@ -84,12 +84,6 @@ export default function GlobalAppBar() {
                       alt="MUNDO CUOTA"
                       className="h-12 sm:h-16 w-auto transition-transform duration-300 group-hover:scale-105"
                     />
-                  ) : isMobile ? (
-                    <img
-                      src="/LOGO2.png"
-                      alt="MUNDO CUOTA"
-                      className="h-24 sm:h-28 w-auto transition-transform duration-300 group-hover:scale-105"
-                    />
                   ) : configuracion?.logo_url ? (
                     <img
                       src={configuracion.logo_url}
@@ -105,7 +99,7 @@ export default function GlobalAppBar() {
                     <img
                       src="/LOGO2.png"
                       alt="MUNDO CUOTA"
-                      className="lg:h-36 xl:h-40 w-auto transition-transform duration-300 group-hover:scale-105"
+                      className={isMobile ? "h-24 sm:h-28 w-auto" : "lg:h-36 xl:h-40 w-auto" + " transition-transform duration-300 group-hover:scale-105"}
                     />
                   )}
                   <div className="absolute inset-0 bg-violet-400 opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>

@@ -53,21 +53,58 @@ export function calcularCuota(precio: number, plan: PlanFinanciacion) {
   // Verificar si el producto aplica para este plan
   if (precio < plan.monto_minimo) return null
   if (plan.monto_maximo && precio > plan.monto_maximo) return null
-  
-  // Calcular precio con recargo
+
+  // Calcular anticipo
+  const anticipo = calcularAnticipo(precio, plan)
+
+  // Si hay anticipo, aplicar la nueva fórmula:
+  // (COSTO - ANTICIPO) = X
+  // (X + recargo%) ÷ cuotas = IMPORTE DE CUOTA
+  if (anticipo > 0) {
+    const montoAFinanciar = precio - anticipo // X = COSTO - ANTICIPO
+    const recargo = montoAFinanciar * plan.recargo_porcentual / 100 // recargo% sobre X
+    const precio_final = montoAFinanciar + recargo // X + recargo
+
+    // Calcular cuota mensual con redondeo especial
+    const cuota_mensual_raw = precio_final / plan.cuotas
+    const cuota_mensual = redondearCuota(cuota_mensual_raw)
+
+    // Calcular precio P.ELECTRO
+    const precio_electro = calcularPrecioElectro(precio)
+    const montoAFinanciarElectro = precio_electro - anticipo // X = COSTO ELECTRO - ANTICIPO
+    const recargo_electro = montoAFinanciarElectro * plan.recargo_porcentual / 100
+    const precio_final_electro = montoAFinanciarElectro + recargo_electro
+    const cuota_mensual_electro = redondearCuota(precio_final_electro / plan.cuotas)
+
+    return {
+      precio_original: precio,
+      recargo_total: recargo,
+      precio_final: precio_final,
+      cuota_mensual: cuota_mensual,
+      cuotas: plan.cuotas,
+      recargo_porcentual: plan.recargo_porcentual,
+      // Nuevos campos para P.ELECTRO
+      precio_electro: precio_electro,
+      precio_final_electro: precio_final_electro,
+      cuota_mensual_electro: cuota_mensual_electro
+    }
+  }
+
+  // Si NO hay anticipo, usar la fórmula original:
+  // Calcular precio con recargo sobre el total
   const recargo = (precio * plan.recargo_porcentual / 100) + plan.recargo_fijo
   const precio_final = precio + recargo
-  
+
   // Calcular cuota mensual con redondeo especial
   const cuota_mensual_raw = precio_final / plan.cuotas
   const cuota_mensual = redondearCuota(cuota_mensual_raw)
-  
+
   // Calcular precio P.ELECTRO
   const precio_electro = calcularPrecioElectro(precio)
   const recargo_electro = (precio_electro * plan.recargo_porcentual / 100) + plan.recargo_fijo
   const precio_final_electro = precio_electro + recargo_electro
   const cuota_mensual_electro = redondearCuota(precio_final_electro / plan.cuotas)
-  
+
   return {
     precio_original: precio,
     recargo_total: recargo,

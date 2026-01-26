@@ -6,6 +6,19 @@ import { ChevronLeft, ChevronRight, Star, X, Heart, Share2 } from "lucide-react"
 import { Marca, Product } from "@/lib/products"
 import { useShoppingList } from "@/hooks/use-shopping-list"
 
+// Función helper para construir URL del proxy de imágenes
+function getProxiedImageUrl(imageUrl: string): string {
+  if (!imageUrl) return imageUrl
+
+  // Si es una URL externa, usar el proxy
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`
+  }
+
+  // Si es una ruta relativa, devolverla sin cambios
+  return imageUrl
+}
+
 interface ProductImageGalleryProps {
   images?: string[]
   productName: string
@@ -225,13 +238,10 @@ export default function ProductImageGallery({ images, productName, isFeatured = 
           <div className={`relative w-full h-full transition-transform duration-300 ${
             isSliding ? (slideDirection === 'left' ? '-translate-x-full' : 'translate-x-full') : 'translate-x-0'
           }`}>
-            <Image
-              src={validImages[currentImageIndex]}
+            <img
+              src={getProxiedImageUrl(validImages[currentImageIndex])}
               alt={`${productName} - Imagen ${currentImageIndex + 1}`}
-              fill
-              className="object-contain transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority={currentImageIndex === 0}
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
               loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
             />
           </div>
@@ -318,12 +328,10 @@ export default function ProductImageGallery({ images, productName, isFeatured = 
                 aria-label={`Ver imagen ${index + 1}`}
                 type="button"
               >
-                <Image 
-                  src={image} 
-                  alt={`Thumbnail ${index + 1}`} 
-                  width={50} 
-                  height={50} 
-                  className="object-contain rounded-lg" 
+                <img
+                  src={getProxiedImageUrl(image)}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-contain rounded-lg"
                   loading="lazy"
                 />
               </button>
@@ -347,13 +355,11 @@ export default function ProductImageGallery({ images, productName, isFeatured = 
               <X size={24} className="text-gray-700" />
             </button>
             
-            <div className="relative w-[90vw] h-[90vh] max-w-4xl max-h-[90vh]">
-              <Image
-                src={validImages[currentImageIndex]}
+            <div className="relative w-[90vw] h-[90vh] max-w-4xl max-h-[90vh] flex items-center justify-center">
+              <img
+                src={getProxiedImageUrl(validImages[currentImageIndex])}
                 alt={`${productName} - Imagen ampliada ${currentImageIndex + 1}`}
-                fill
-                className="object-contain"
-                sizes="90vw"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
             

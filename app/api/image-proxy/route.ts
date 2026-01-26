@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     // Permitir URLs de dominios confiables
     const allowedDomains = [
       'supabase.co',
+      'rckwahufvqehuwjwaomq.supabase.co',
       'postimages.org',
       'postimg.cc',
       'i.postimg.cc',
@@ -34,7 +35,11 @@ export async function GET(request: NextRequest) {
       'madeiramadeira.com.br',
       'musimundo.com',
       'cloudinary.com',
-      'piletin.com.ar'
+      'piletin.com.ar',
+      'dibra.com.ar',
+      'samsungar.vtexassets.com',
+      'tcl.com',
+      'delos.com.ar'
     ]
     const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain))
 
@@ -59,7 +64,7 @@ export async function GET(request: NextRequest) {
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'
-    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar') || imageUrl.includes('escorial.com.ar') || imageUrl.includes('nataliahogar.com.ar') || imageUrl.includes('megatone.net') || imageUrl.includes('philco.com.ar') || imageUrl.includes('ken-brown.com.ar') || imageUrl.includes('laanonima.com.ar') || imageUrl.includes('madeiramadeira.com.br') || imageUrl.includes('musimundo.com') || imageUrl.includes('cloudinary.com') || imageUrl.includes('piletin.com.ar')) {
+    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar') || imageUrl.includes('escorial.com.ar') || imageUrl.includes('nataliahogar.com.ar') || imageUrl.includes('megatone.net') || imageUrl.includes('philco.com.ar') || imageUrl.includes('ken-brown.com.ar') || imageUrl.includes('laanonima.com.ar') || imageUrl.includes('madeiramadeira.com.br') || imageUrl.includes('musimundo.com') || imageUrl.includes('cloudinary.com') || imageUrl.includes('piletin.com.ar') || imageUrl.includes('dibra.com.ar') || imageUrl.includes('samsungar.vtexassets.com') || imageUrl.includes('tcl.com') || imageUrl.includes('delos.com.ar')) {
       // Para sitios de tiendas, usar headers de navegador para evitar bloqueos
       headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Sec-Fetch-Dest'] = 'image'

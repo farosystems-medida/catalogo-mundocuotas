@@ -48,17 +48,23 @@ export async function GET(request: NextRequest) {
     try {
       const urlObj = new URL(imageUrl)
       const hostname = urlObj.hostname.toLowerCase()
-      isAllowed = allowedDomains.some(domain =>
-        hostname === domain.toLowerCase() ||
-        hostname.endsWith('.' + domain.toLowerCase())
-      )
-    } catch {
+      console.log('🔍 Image Proxy - Hostname extraído:', hostname)
+      isAllowed = allowedDomains.some(domain => {
+        const matches = hostname === domain.toLowerCase() || hostname.endsWith('.' + domain.toLowerCase())
+        if (matches) {
+          console.log('✅ Image Proxy - Dominio permitido:', domain)
+        }
+        return matches
+      })
+    } catch (error) {
+      console.log('⚠️ Image Proxy - Error parsing URL, usando método alternativo:', error)
       // Si falla el parsing de URL, usar el método anterior
       isAllowed = allowedDomains.some(domain => imageUrl.toLowerCase().includes(domain.toLowerCase()))
     }
 
     if (!isAllowed) {
       console.log('❌ Image Proxy - Invalid URL (not from allowed domains):', imageUrl)
+      console.log('❌ Image Proxy - Dominios permitidos:', allowedDomains)
       return new NextResponse('Invalid URL', { status: 400 })
     }
 

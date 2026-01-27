@@ -109,11 +109,13 @@ export default function ProductImageGallery({ images, productName, isFeatured = 
   const validImages = (images || [])
     .filter(img => img && img.trim() !== '')
     .map(img => img.trim())
-  
+
   // Debug: Log para verificar las imágenes
-  //console.log('🔍 ProductImageGallery - Imágenes recibidas:', images)
-  //console.log('🔍 ProductImageGallery - Imágenes válidas:', validImages)
-  //console.log('🔍 ProductImageGallery - Índice actual:', currentImageIndex)
+  console.log('🔍 ProductImageGallery - Imágenes recibidas:', images)
+  console.log('🔍 ProductImageGallery - Imágenes válidas:', validImages)
+  console.log('🔍 ProductImageGallery - Índice actual:', currentImageIndex)
+  console.log('🔍 ProductImageGallery - URL de imagen actual:', validImages[currentImageIndex])
+  console.log('🔍 ProductImageGallery - URL proxied:', getProxiedImageUrl(validImages[currentImageIndex]))
 
   if (validImages.length === 0) {
     return (

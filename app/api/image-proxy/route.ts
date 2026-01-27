@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
       'laanonima.com.ar',
       'madeiramadeira.com.br',
       'musimundo.com',
+      'medias.musimundo.com',
       'cloudinary.com',
       'piletin.com.ar',
       'dibra.com.ar',
@@ -41,7 +42,20 @@ export async function GET(request: NextRequest) {
       'tcl.com',
       'delos.com.ar'
     ]
-    const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain))
+
+    // Validación más robusta: extraer el hostname de la URL y comparar
+    let isAllowed = false
+    try {
+      const urlObj = new URL(imageUrl)
+      const hostname = urlObj.hostname.toLowerCase()
+      isAllowed = allowedDomains.some(domain =>
+        hostname === domain.toLowerCase() ||
+        hostname.endsWith('.' + domain.toLowerCase())
+      )
+    } catch {
+      // Si falla el parsing de URL, usar el método anterior
+      isAllowed = allowedDomains.some(domain => imageUrl.toLowerCase().includes(domain.toLowerCase()))
+    }
 
     if (!isAllowed) {
       console.log('❌ Image Proxy - Invalid URL (not from allowed domains):', imageUrl)

@@ -114,26 +114,33 @@ export async function GET(request: NextRequest) {
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'
-    } else if (urlToFetch.includes('store.midea.com.ar') || urlToFetch.includes('daewooherramientas.com.ar') || urlToFetch.includes('escorial.com.ar') || urlToFetch.includes('nataliahogar.com.ar') || urlToFetch.includes('megatone.net') || urlToFetch.includes('philco.com.ar') || urlToFetch.includes('ken-brown.com.ar') || urlToFetch.includes('laanonima.com.ar') || urlToFetch.includes('madeiramadeira.com.br') || urlToFetch.includes('musimundo.com') || urlToFetch.includes('medias.musimundo.com') || urlToFetch.includes('cloudinary.com') || urlToFetch.includes('piletin.com.ar') || urlToFetch.includes('dibra.com.ar') || urlToFetch.includes('samsungar.vtexassets.com') || urlToFetch.includes('tcl.com') || urlToFetch.includes('delos.com.ar') || urlToFetch.includes('fornax.com.ar') || urlToFetch.includes('atma.com.ar')) {
+    } else if (urlToFetch.includes('musimundo.com') || urlToFetch.includes('medias.musimundo.com')) {
+      // Para Musimundo, headers muy específicos para evitar bloqueos
+      headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+      headers['Accept'] = 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      headers['Accept-Encoding'] = 'gzip, deflate, br, zstd'
+      headers['Accept-Language'] = 'es-419,es;q=0.9'
+      headers['Referer'] = 'https://www.musimundo.com/'
+      headers['Sec-Ch-Ua'] = '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"'
+      headers['Sec-Ch-Ua-Mobile'] = '?0'
+      headers['Sec-Ch-Ua-Platform'] = '"Windows"'
+      headers['Sec-Fetch-Dest'] = 'image'
+      headers['Sec-Fetch-Mode'] = 'no-cors'
+      headers['Sec-Fetch-Site'] = 'same-site'
+      headers['Priority'] = 'i'
+      delete headers['Cache-Control'] // Eliminar el no-cache
+    } else if (urlToFetch.includes('store.midea.com.ar') || urlToFetch.includes('daewooherramientas.com.ar') || urlToFetch.includes('escorial.com.ar') || urlToFetch.includes('nataliahogar.com.ar') || urlToFetch.includes('megatone.net') || urlToFetch.includes('philco.com.ar') || urlToFetch.includes('ken-brown.com.ar') || urlToFetch.includes('laanonima.com.ar') || urlToFetch.includes('madeiramadeira.com.br') || urlToFetch.includes('cloudinary.com') || urlToFetch.includes('piletin.com.ar') || urlToFetch.includes('dibra.com.ar') || urlToFetch.includes('samsungar.vtexassets.com') || urlToFetch.includes('tcl.com') || urlToFetch.includes('delos.com.ar') || urlToFetch.includes('fornax.com.ar') || urlToFetch.includes('atma.com.ar')) {
       // Para sitios de tiendas, usar headers de navegador para evitar bloqueos
-      headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
       headers['Accept-Encoding'] = 'gzip, deflate, br'
       headers['Accept-Language'] = 'es-ES,es;q=0.9,en;q=0.8'
-      headers['Connection'] = 'keep-alive'
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'
 
-      // Para Musimundo específicamente, agregar referer
-      if (urlToFetch.includes('musimundo.com')) {
-        headers['Referer'] = 'https://www.musimundo.com/'
-        headers['Origin'] = 'https://www.musimundo.com'
-      }
-
       // Para ATMA específicamente, agregar referer
       if (urlToFetch.includes('atma.com.ar')) {
         headers['Referer'] = 'https://atma.com.ar/'
-        headers['Origin'] = 'https://atma.com.ar'
       }
     } else {
       // Para otros (Facebook, Supabase), usar headers de bot de Facebook

@@ -5,11 +5,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const imageUrl = searchParams.get('url')
 
+    console.log('🔍 Image Proxy - Request URL completa:', request.url)
     console.log('🔍 Image Proxy - URL solicitada:', imageUrl)
+    console.log('🔍 Image Proxy - Headers:', Object.fromEntries(request.headers.entries()))
 
     if (!imageUrl) {
       console.log('❌ Image Proxy - No URL parameter')
       return new NextResponse('Missing url parameter', { status: 400 })
+    }
+
+    // Decodificar la URL si está codificada
+    let decodedUrl = imageUrl
+    try {
+      decodedUrl = decodeURIComponent(imageUrl)
+      console.log('🔍 Image Proxy - URL decodificada:', decodedUrl)
+    } catch (e) {
+      console.log('⚠️ Image Proxy - No se pudo decodificar URL, usando original')
     }
 
     // Permitir URLs de dominios confiables
@@ -41,39 +52,49 @@ export async function GET(request: NextRequest) {
       'samsungar.vtexassets.com',
       'tcl.com',
       'delos.com.ar',
-      'fornax.com.ar'
+      'fornax.com.ar',
+      'atma.com.ar'
     ]
 
-    // Validación más robusta: extraer el hostname de la URL y comparar
+    // Validación: Solo verificar que sea una URL válida con http/https
+    // Permitir TODOS los dominios externos ya que las URLs vienen de nuestra base de datos controlada
     let isAllowed = false
     let hostname = ''
+    let urlToFetch = decodedUrl
+
     try {
-      const urlObj = new URL(imageUrl)
+      const urlObj = new URL(decodedUrl)
       hostname = urlObj.hostname.toLowerCase()
-      console.log('🔍 Image Proxy - Hostname extraído:', hostname)
 
-      // Verificar si el hostname coincide con algún dominio permitido
-      isAllowed = allowedDomains.some(domain => {
-        const domainLower = domain.toLowerCase()
-        const matches =
-          hostname === domainLower ||
-          hostname.endsWith('.' + domainLower) ||
-          hostname.includes(domainLower)
+      // Permitir cualquier URL que sea http o https
+      isAllowed = urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
 
-        if (matches) {
-          console.log('✅ Image Proxy - Dominio permitido:', domain, '(hostname:', hostname, ')')
-        }
-        return matches
-      })
+      if (isAllowed) {
+        console.log('✅ Image Proxy - URL válida permitida:', hostname)
+        console.log('✅ Image Proxy - Protocol:', urlObj.protocol)
+      } else {
+        console.log('❌ Image Proxy - Protocol no permitido:', urlObj.protocol)
+      }
     } catch (error) {
-      console.log('⚠️ Image Proxy - Error parsing URL, usando método alternativo:', error)
-      // Si falla el parsing de URL, usar el método anterior
-      isAllowed = allowedDomains.some(domain => imageUrl.toLowerCase().includes(domain.toLowerCase()))
+      console.log('⚠️ Image Proxy - Error al parsear URL:', error)
+      console.log('⚠️ Image Proxy - URL que falló:', decodedUrl)
+
+      // Intentar con la URL original sin decodificar
+      try {
+        const urlObj = new URL(imageUrl)
+        hostname = urlObj.hostname.toLowerCase()
+        isAllowed = urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+        urlToFetch = imageUrl
+        console.log('✅ Image Proxy - Usando URL original sin decodificar:', imageUrl)
+      } catch (error2) {
+        console.log('❌ Image Proxy - Fallo también con URL original:', error2)
+        isAllowed = false
+      }
     }
 
     if (!isAllowed) {
-      console.log('❌ Image Proxy - Invalid URL (not from allowed domains):', imageUrl)
-      console.log('❌ Image Proxy - Dominios permitidos:', allowedDomains)
+      console.log('❌ Image Proxy - Invalid URL:', imageUrl)
+      console.log('❌ Image Proxy - Decoded URL:', decodedUrl)
       return new NextResponse('Invalid URL', { status: 400 })
     }
 
@@ -87,13 +108,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Para PostImages, usar headers de navegador normal
-    if (imageUrl.includes('postimg')) {
+    if (urlToFetch.includes('postimg')) {
       headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Referer'] = 'https://postimages.org/'
       headers['Sec-Fetch-Dest'] = 'image'
       headers['Sec-Fetch-Mode'] = 'no-cors'
       headers['Sec-Fetch-Site'] = 'cross-site'
-    } else if (imageUrl.includes('store.midea.com.ar') || imageUrl.includes('daewooherramientas.com.ar') || imageUrl.includes('escorial.com.ar') || imageUrl.includes('nataliahogar.com.ar') || imageUrl.includes('megatone.net') || imageUrl.includes('philco.com.ar') || imageUrl.includes('ken-brown.com.ar') || imageUrl.includes('laanonima.com.ar') || imageUrl.includes('madeiramadeira.com.br') || imageUrl.includes('musimundo.com') || imageUrl.includes('medias.musimundo.com') || imageUrl.includes('cloudinary.com') || imageUrl.includes('piletin.com.ar') || imageUrl.includes('dibra.com.ar') || imageUrl.includes('samsungar.vtexassets.com') || imageUrl.includes('tcl.com') || imageUrl.includes('delos.com.ar') || imageUrl.includes('fornax.com.ar')) {
+    } else if (urlToFetch.includes('store.midea.com.ar') || urlToFetch.includes('daewooherramientas.com.ar') || urlToFetch.includes('escorial.com.ar') || urlToFetch.includes('nataliahogar.com.ar') || urlToFetch.includes('megatone.net') || urlToFetch.includes('philco.com.ar') || urlToFetch.includes('ken-brown.com.ar') || urlToFetch.includes('laanonima.com.ar') || urlToFetch.includes('madeiramadeira.com.br') || urlToFetch.includes('musimundo.com') || urlToFetch.includes('medias.musimundo.com') || urlToFetch.includes('cloudinary.com') || urlToFetch.includes('piletin.com.ar') || urlToFetch.includes('dibra.com.ar') || urlToFetch.includes('samsungar.vtexassets.com') || urlToFetch.includes('tcl.com') || urlToFetch.includes('delos.com.ar') || urlToFetch.includes('fornax.com.ar') || urlToFetch.includes('atma.com.ar')) {
       // Para sitios de tiendas, usar headers de navegador para evitar bloqueos
       headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       headers['Accept-Encoding'] = 'gzip, deflate, br'
@@ -104,9 +125,15 @@ export async function GET(request: NextRequest) {
       headers['Sec-Fetch-Site'] = 'cross-site'
 
       // Para Musimundo específicamente, agregar referer
-      if (imageUrl.includes('musimundo.com')) {
+      if (urlToFetch.includes('musimundo.com')) {
         headers['Referer'] = 'https://www.musimundo.com/'
         headers['Origin'] = 'https://www.musimundo.com'
+      }
+
+      // Para ATMA específicamente, agregar referer
+      if (urlToFetch.includes('atma.com.ar')) {
+        headers['Referer'] = 'https://atma.com.ar/'
+        headers['Origin'] = 'https://atma.com.ar'
       }
     } else {
       // Para otros (Facebook, Supabase), usar headers de bot de Facebook
@@ -114,7 +141,10 @@ export async function GET(request: NextRequest) {
       headers['Referer'] = 'https://www.facebook.com/'
     }
 
-    const response = await fetch(imageUrl, { headers })
+    console.log('📤 Image Proxy - Haciendo fetch a:', urlToFetch)
+    console.log('📤 Image Proxy - Con headers:', headers)
+
+    const response = await fetch(urlToFetch, { headers })
 
     console.log('📤 Image Proxy - Response status:', response.status)
 

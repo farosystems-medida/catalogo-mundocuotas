@@ -10,6 +10,7 @@ export interface Categoria {
   fk_id_linea?: number
   created_at: string
   linea?: Linea
+  imagen_url?: string
 }
 
 export interface Marca {

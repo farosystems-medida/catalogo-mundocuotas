@@ -14,8 +14,8 @@ export default async function Home() {
       <GlobalAppBar />
 
       <main>
-        <FeaturedSection />
         <PromocionesBanner />
+        <FeaturedSection />
         <Promo12CuotasSection />
         {mostrarCombos && <CombosSection />}
       </main>

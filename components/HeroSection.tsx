@@ -31,7 +31,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: "url('/navidad.png')"
+          backgroundImage: "url('/dia-del-padre.jpg')"
         }}
       >
         {/* Overlay mejorado para mayor calidad visual */}

@@ -139,3 +139,31 @@ export interface ComboProducto {
   // Relación con producto
   producto?: Product
 }
+
+export interface Promocion {
+  id: number
+  nombre: string
+  descripcion?: string
+  slug?: string
+  imagen?: string
+  fecha_vigencia_inicio?: string
+  fecha_vigencia_fin?: string
+  activo: boolean
+  created_at: string
+  updated_at: string
+
+  // Relaciones
+  items?: PromocionItem[]
+}
+
+export interface PromocionItem {
+  id: number
+  fk_id_promocion: number
+  fk_id_producto: number
+  descuento_porcentaje?: number
+  precio_promocional?: number
+  created_at: string
+
+  // Relación con producto
+  producto?: Product
+}

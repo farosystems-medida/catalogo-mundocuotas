@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Product, Categoria, Marca, Linea, PlanFinanciacion, ProductoPlan } from './products'
+import { Product, Categoria, Marca, Linea, PlanFinanciacion, ProductoPlan, Promocion } from './products'
 
 // Cache global para categorías y marcas
 let categoriesCache: Map<number, Categoria> | null = null
@@ -1313,6 +1313,144 @@ export async function getPlanHomeDinamico(): Promise<PlanFinanciacion | null> {
     return planData
   } catch (error) {
     console.error('Error fetching plan dinámico home:', error)
+    return null
+  }
+}
+
+// Genera una URL amigable a partir de un texto (usado como fallback cuando la promoción no tiene slug propio)
+export function slugify(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// Devuelve el slug a usar en la URL: el propio si existe, o uno generado a partir del nombre
+export function getPromocionSlug(promocion: { slug?: string; nombre: string; id: number }): string {
+  return promocion.slug?.trim() || slugify(promocion.nombre) || promocion.id.toString()
+}
+
+// Verificar si una promoción está vigente (activa y dentro del rango de fechas)
+export function isPromocionVigente(promocion: any): boolean {
+  if (!promocion.activo) return false
+
+  const now = new Date()
+  const inicio = promocion.fecha_vigencia_inicio ? new Date(promocion.fecha_vigencia_inicio) : null
+  const fin = promocion.fecha_vigencia_fin ? new Date(promocion.fecha_vigencia_fin) : null
+
+  if (inicio && now < inicio) return false
+  if (fin && now > fin) return false
+
+  return true
+}
+
+// Obtener promociones vigentes para mostrar como banner en la home
+export async function getPromocionesVigentes(): Promise<Promocion[]> {
+  try {
+    const { data, error } = await supabase
+      .from('promociones')
+      .select('*')
+      .eq('activo', true)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching promociones:', error)
+      return []
+    }
+
+    return (data || []).filter(isPromocionVigente)
+  } catch (error) {
+    console.error('Error fetching promociones:', error)
+    return []
+  }
+}
+
+// Obtener una promoción por slug (o por id si no se encuentra por slug) junto a sus productos
+export async function getPromocionBySlugOrId(slugOrId: string): Promise<Promocion | null> {
+  try {
+    const isNumeric = /^\d+$/.test(slugOrId)
+    let promocion: any = null
+
+    if (isNumeric) {
+      const { data, error } = await supabase
+        .from('promociones')
+        .select('*')
+        .eq('id', parseInt(slugOrId))
+        .eq('activo', true)
+        .single()
+
+      if (error) console.error('Error fetching promocion by id:', error)
+      promocion = data
+    } else {
+      const { data, error } = await supabase
+        .from('promociones')
+        .select('*')
+        .eq('slug', slugOrId)
+        .eq('activo', true)
+        .single()
+
+      if (error || !data) {
+        // La promoción no tiene slug propio en la base: buscar por el slug generado a partir del nombre
+        const { data: activas, error: activasError } = await supabase
+          .from('promociones')
+          .select('*')
+          .eq('activo', true)
+
+        if (activasError) console.error('Error fetching promociones:', activasError)
+
+        promocion = activas?.find(p => getPromocionSlug(p) === slugOrId) || null
+      } else {
+        promocion = data
+      }
+    }
+
+    if (!promocion) {
+      console.error('Promocion no encontrada para:', slugOrId)
+      return null
+    }
+
+    const { data: items, error: itemsError } = await supabase
+      .from('promociones_items')
+      .select(`
+        *,
+        productos:fk_id_producto (*)
+      `)
+      .eq('fk_id_promocion', promocion.id)
+
+    if (itemsError) {
+      console.error('Error fetching promocion items:', itemsError)
+    }
+
+    const { categoriesCache, brandsCache } = await getCachedCategoriesAndBrands()
+
+    const itemsConRelaciones = items?.map(item => {
+      const producto = item.productos
+      if (!producto) return item
+
+      const categoria = categoriesCache.get(producto.fk_id_categoria) ||
+                       { id: producto.fk_id_categoria || 1, descripcion: `Categoría ${producto.fk_id_categoria || 1}` }
+
+      const marca = brandsCache.get(producto.fk_id_marca) ||
+                   { id: producto.fk_id_marca || 1, descripcion: `Marca ${producto.fk_id_marca || 1}` }
+
+      return {
+        ...item,
+        producto: {
+          ...producto,
+          precio: item.precio_promocional ?? producto.precio,
+          categoria,
+          marca
+        }
+      }
+    }) || []
+
+    return {
+      ...promocion,
+      items: itemsConRelaciones
+    }
+  } catch (error) {
+    console.error('Error fetching promocion:', error)
     return null
   }
 }

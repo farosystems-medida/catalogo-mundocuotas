@@ -178,7 +178,7 @@ export default function FeaturedSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/navidad.png')"
+          backgroundImage: "url('/dia-del-padre.jpg')"
         }}
       >
         {/* Overlay para mantener legibilidad */}

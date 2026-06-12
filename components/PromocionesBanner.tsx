@@ -49,11 +49,8 @@ export default function PromocionesBanner() {
               href={`/promociones/${getPromocionSlug(promocion)}`}
               className="group block w-full"
             >
-              <h3 className="mb-4 text-center text-3xl sm:text-5xl md:text-6xl font-['Fredoka'] font-bold uppercase tracking-wide drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)] bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-400 bg-clip-text text-transparent animate-pulse-glow">
-                🎁 Especial Día del Padre
-              </h3>
               <div className="relative w-full">
-                <div className="relative w-full overflow-hidden transition-all duration-300">
+                <div className="relative w-full overflow-hidden rounded-2xl transition-all duration-300">
                   {/* Banner mobile: usa imagen_mobile si existe, sino cae a la imagen de escritorio */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

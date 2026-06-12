@@ -3,20 +3,41 @@
 import { useConfiguracionWebContext } from '@/contexts/ConfiguracionWebContext'
 import { useEffect } from 'react'
 
+// Carga (o reemplaza) el <link> de Google Fonts para la tipografía elegida en el admin
+const loadGoogleFont = (fontFamily: string, linkId: string) => {
+  const fontName = fontFamily.split(',')[0].trim().replace(/['"]/g, '')
+  const href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;500;600;700&display=swap`
+
+  const existing = document.getElementById(linkId) as HTMLLinkElement | null
+  if (existing) {
+    if (existing.href !== href) existing.href = href
+    return
+  }
+
+  const link = document.createElement('link')
+  link.id = linkId
+  link.rel = 'stylesheet'
+  link.href = href
+  document.head.appendChild(link)
+}
+
 export default function GlobalStyles() {
   const { configuracion } = useConfiguracionWebContext()
 
   useEffect(() => {
     if (!configuracion) return
 
+    // Cargar dinámicamente la fuente de Google elegida para los títulos de sección
+    loadGoogleFont(configuracion.font_family_primary, 'google-font-primary')
+
     // Aplicar variables CSS personalizadas al documento
     const root = document.documentElement
-    
+
     // Colores
     root.style.setProperty('--primary-color', configuracion.primary_color)
     root.style.setProperty('--secondary-color', configuracion.secondary_color)
     root.style.setProperty('--accent-color', configuracion.accent_color)
-    
+
     // Tipografías
     root.style.setProperty('--font-family-primary', configuracion.font_family_primary)
     root.style.setProperty('--font-family-secondary', configuracion.font_family_secondary)

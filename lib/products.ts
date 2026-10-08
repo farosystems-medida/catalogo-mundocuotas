@@ -147,6 +147,7 @@ export interface Promocion {
   slug?: string
   imagen?: string
   imagen_mobile?: string
+  imagen_banner?: string
   fecha_vigencia_inicio?: string
   fecha_vigencia_fin?: string
   activo: boolean

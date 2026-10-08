@@ -65,6 +65,11 @@ export interface ConfiguracionWeb {
   combos_subtitulo: string | null
   titulo_seccion_promos: string | null
   titulo_seccion_destacados: string | null
+
+  // Imágenes del sitio (gestionadas desde el dashboard)
+  imagen_hero: string | null
+  imagen_destacados: string | null
+  imagen_banner_promociones: string | null
 }
 
 export interface Zona {

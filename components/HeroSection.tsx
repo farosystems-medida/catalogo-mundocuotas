@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react"
 import TypewriterText from "./TypewriterText"
+import { useConfiguracionWebContext } from "@/contexts/ConfiguracionWebContext"
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const { configuracion, loading: configLoading } = useConfiguracionWebContext()
+  const backgroundImage = configLoading ? undefined : (configuracion?.imagen_hero || '/dia-del-padre.jpg')
   const [snowflakes, setSnowflakes] = useState<Array<{ id: number; left: number; delay: number; duration: number; size: number }>>([])
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage: "url('/dia-del-padre.jpg')"
+          backgroundImage: backgroundImage ? `url('${backgroundImage}')` : undefined
         }}
       >
         {/* Overlay mejorado para mayor calidad visual */}

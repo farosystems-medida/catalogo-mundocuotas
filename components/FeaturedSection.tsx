@@ -6,6 +6,7 @@ import Pagination from "./Pagination"
 import { getFeaturedProducts } from "@/lib/supabase-products"
 import { getTituloSeccionDestacados } from "@/lib/supabase-config"
 import { Product } from "@/lib/products"
+import { useConfiguracionWebContext } from "@/contexts/ConfiguracionWebContext"
 
 const FEATURED_PRODUCTS_PER_PAGE = 3
 
@@ -16,6 +17,8 @@ export default function FeaturedSection() {
   const [currentPage, setCurrentPage] = useState(1)
   const [currentMobilePage, setCurrentMobilePage] = useState(0)
   const [tituloSeccion, setTituloSeccion] = useState<string>('Productos Destacados')
+  const { configuracion, loading: configLoading } = useConfiguracionWebContext()
+  const backgroundImage = configLoading ? undefined : (configuracion?.imagen_destacados || '/dia-del-padre.jpg')
   const scrollRef = useRef<HTMLDivElement>(null)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
   const mobileAutoplayRef = useRef<NodeJS.Timeout | null>(null)
@@ -178,7 +181,7 @@ export default function FeaturedSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/dia-del-padre.jpg')"
+          backgroundImage: backgroundImage ? `url('${backgroundImage}')` : undefined
         }}
       >
         {/* Overlay para mantener legibilidad */}

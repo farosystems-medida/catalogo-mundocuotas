@@ -9,6 +9,7 @@ import ProductCard from "@/components/ProductCard"
 import FormattedProductDescription from "@/components/FormattedProductDescription"
 import { getPromocionBySlugOrId } from "@/lib/supabase-products"
 import { Promocion } from "@/lib/products"
+import { useConfiguracionWebContext } from "@/contexts/ConfiguracionWebContext"
 import { ArrowLeft, Calendar } from "lucide-react"
 
 interface PromocionPageClientProps {
@@ -22,6 +23,7 @@ export default function PromocionPageClient({ params: paramsPromise }: Promocion
   const [loading, setLoading] = useState(true)
   const [params, setParams] = useState<{ slug: string } | null>(null)
   const router = useRouter()
+  const { configuracion, loading: configLoading } = useConfiguracionWebContext()
 
   useEffect(() => {
     const resolveParams = async () => {
@@ -77,6 +79,9 @@ export default function PromocionPageClient({ params: paramsPromise }: Promocion
     return null
   }
 
+  // Banner de la página: imagen propia de la promo → banner por defecto de configuración → imagen local
+  const bannerImage = (promocion.imagen_banner || configuracion?.imagen_banner_promociones || '/dia-del-padre.jpg').trim()
+
   const productos = (promocion.items || [])
     .map(item => item.producto)
     .filter((producto): producto is NonNullable<typeof producto> => Boolean(producto))
@@ -87,14 +92,16 @@ export default function PromocionPageClient({ params: paramsPromise }: Promocion
 
       {/* Banner de la promoción */}
       <div className="relative w-full aspect-[21/9] sm:aspect-[32/9] max-h-[220px] sm:max-h-[320px] overflow-hidden">
-        <Image
-          src="/dia-del-padre.jpg"
-          alt={promocion.nombre}
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
+        {!configLoading && (
+          <Image
+            src={bannerImage}
+            alt={promocion.nombre}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
